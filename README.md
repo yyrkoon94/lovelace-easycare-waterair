@@ -8,6 +8,29 @@ A [Home Assistant][home-assistant] Lovelace Card to display Waterair Pool with E
 
 ![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot1.png)
 
+## Installation
+
+The simplest way to install this card is to add this repository to HACS. If you wish to install it manually, you may follow the instructions below.
+
+### Upload to HA
+
+Download source code zip file file from the [latest-release][release-url].
+Put the contains of the 'dist' repository into your `config/www` in a folder named `community/lovelace-easycare-waterair`.
+
+### Add the custom to Lovelace resources
+Add reference to `idf-mobilite.js` in Dashboard :
+    _Settings_ → _Dashboards_ → _More Options icon_ → _Resources_ → _Add Resource_ → Set _Url_ as `/local/community/lovelace-easycare-waterair/easycare-waterair.js` → Set _Resource type_ as `JavaScript Module`.
+      **Note:** If you do not see the Resources menu, you will need to enable _Advanced Mode_ in your _User Profile_
+
+## Usage
+The Lovelace Card come with a custom Card Editor to configure the card. If you don't see it, you must create first a custom card to have the editor in the **Add Card** list. So just create a **Custom Card** and add the folowing code :
+```
+type: custom:easy-care-card
+```
+
+Then clic on the code editor, you will see this page :
+![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/cardeditor.png)
+
 <!-- Badges -->
 [release-badge]: https://img.shields.io/github/v/release/yyrkoon94/lovelace-easycare-waterair?style=flat-square
 [downloads-badge]: https://img.shields.io/github/downloads/yyrkoon94/lovelace-easycare-waterair/total?style=flat-square
