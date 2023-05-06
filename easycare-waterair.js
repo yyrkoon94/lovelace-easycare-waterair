@@ -7,6 +7,19 @@ import "./gauge.min.js?module";
 
 const timerValues = ["Off", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00"]
 
+const fireEvent = (node, type, detail, options) => {
+    options = options || {};
+    detail = detail === null || detail === undefined ? {} : detail;
+    const event = new Event(type, {
+      bubbles: options.bubbles === undefined ? true : options.bubbles,
+      cancelable: Boolean(options.cancelable),
+      composed: options.composed === undefined ? true : options.composed,
+    });
+    event.detail = detail;
+    node.dispatchEvent(event);
+    return event;
+  };
+
 class EasyCareCard extends LitElement {
     static get properties() {
         return {
@@ -24,14 +37,10 @@ class EasyCareCard extends LitElement {
         }
     }
 
-
-
     render() {
         if (!this.config || !this.hass) {
             return html``;
         }
-
-        const poolDetailObj = this.hass.states["sensor.pool_detail"];
         return html`
             ${this.getStyles()}
             <ha-card>
@@ -47,14 +56,17 @@ class EasyCareCard extends LitElement {
     }
 
     firstUpdated(changedProperties) {
-        this.createPhGauge(this.shadowRoot.getElementById("phGauge"));
-        this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"));
-        this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"));
+        if (this.config.poolPhEntity)
+            this.createPhGauge(this.shadowRoot.getElementById("phGauge"));
+        if (this.config.poolTemperatureEntity)
+            this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"));
+        if (this.config.poolChlorineEntity)
+            this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"));
     }
 
     setConfig(config) {
-        if (!config.entity) {
-            throw new Error("You need to define entities");
+        if (!config.poolDetailEntity) {
+            throw new Error("You need to define a poolDetailEntity");
         }
         this.config = config;
     }
@@ -66,7 +78,8 @@ class EasyCareCard extends LitElement {
     }
 
     getTitleBar() {
-        const poolDetailObj = this.hass.states["sensor.pool_detail"];
+        const poolDetailObj = this.hass.states[this.config.poolDetailEntity];
+        const poolNotification = this.hass.states[this.config.poolNotificationEntity];
         const easyCareConnectionObj = this.hass.states["binary_sensor.easy_care_connection"];
         return html`
             <div class="poolCardTitleContainer">
@@ -75,7 +88,8 @@ class EasyCareCard extends LitElement {
                         ${poolDetailObj.state}
                     </div>
                     <div class="zoneMessage">
-                        Votre piscine a besoin de vous
+                    ${poolNotification ?
+                        "Votre piscine a besoin de vous": ""}
                     </div>
                     <div class="zoneVolume">
                         ${poolDetailObj.attributes.pool_volume}m3
@@ -91,122 +105,157 @@ class EasyCareCard extends LitElement {
     }
 
     getBodyContent() {
+        const poolNotification = this.hass.states[this.config.poolNotificationEntity];
+        const spotLight = this.hass.states[this.config.spotLightEntity];
+        const escaLight = this.hass.states[this.config.escalightEntity];
         return html`
             <div class="poolCardBodyContainer">
                 <div class="poolBodyTop">
                 </div>
                 <div class="poolBodyLightContainer">
-                    <div class="poolBodyLightLeft">
-                        <div class="lightName">
-                            <div class="lightText">Spot</div>
-                            <div class="lightImage" style="color:yellow">
-                                <ha-icon icon="mdi:lightbulb-on">
+                    ${spotLight?
+                        html`<div class="poolBodyLightLeft">
+                            <div class="lightName">
+                                <div class="lightText">Spot</div>
+                                <div class="lightImage" style="color:yellow">
+                                    <ha-icon icon="mdi:lightbulb-on">
+                                </div>
                             </div>
-                        </div>
-                        <div class="timerContainer">
-                            <div class="selectTimer">
-                                ${this.createTimer("spot")}
+                            <div class="timerContainer">
+                                <div class="selectTimer">
+                                    ${this.createTimer("spot")}
+                                </div>
+                                <div class="lightButton">
+                                    <ha-icon icon="mdi:launch">
+                                </div>
                             </div>
-                            <div class="lightButton">
-                                <ha-icon icon="mdi:launch">
+                            <div class="timeRemainning">
+                                <div class="timeStatus">
+                                    Status:&nbsp;<span style="color:yellow;font-weight: bold;">On</span>
+                                </div>
+                                <div class="remaining">
+                                    00:42
+                                </div>
                             </div>
-                        </div>
-                        <div class="timeRemainning">
-                            <div class="timeStatus">
-                                Status:&nbsp;<span style="color:yellow;font-weight: bold;">On</span>
-                            </div>
-                            <div class="remaining">
-                                00:42
-                            </div>
-                        </div>
-                    </div>
+                        </div>`: ""}
                     <div class="poolBodyMiddle">
                         <div class="emptyBodyMiddleDiv">
                         </div>
-                        <div class="poolTreatmentMessage">
-                            Votre Traitement Easy Pool 2
-                        </div>
+                        ${poolNotification ?
+                            html`<div class="poolTreatmentMessage">
+                                    Votre Traitement Easy Pool 2
+                                </div>`
+                            : ""}
                     </div>
-                    <div class="poolBodyLightRight">
-                        <div class="lightName">
-                            <div class="lightText">Escalight</div>
-                            <div class="lightImage">
-                            <ha-icon icon="mdi:light-recessed"></ha-icon>
-                            <ha-icon icon="mdi:light-recessed"></ha-icon>
-                            <ha-icon icon="mdi:light-recessed"></ha-icon>
-                            </div>
-                        </div>
-                        <div class="timerContainer">
-                            <div class="selectTimer">
-                                ${this.createTimer("escalight")}
-                            </div>
-                            <div class="lightButton">
-                                <ha-icon icon="mdi:launch">
-                            </div>
-                        </div>
-                        <div class="timeRemainning">
-                            <div class="timeStatus">
-                                Status: Off
-                            </div>
-                            <div class="remaining">
-                            </div>
-                        </div>
-                    </div>
+                    ${escaLight?
+                        html`
+                            <div class="poolBodyLightRight">
+                                <div class="lightName">
+                                    <div class="lightText">Escalight</div>
+                                    <div class="lightImage">
+                                    <ha-icon icon="mdi:light-recessed"></ha-icon>
+                                    <ha-icon icon="mdi:light-recessed"></ha-icon>
+                                    <ha-icon icon="mdi:light-recessed"></ha-icon>
+                                    </div>
+                                </div>
+                                <div class="timerContainer">
+                                    <div class="selectTimer">
+                                        ${this.createTimer("escalight")}
+                                    </div>
+                                    <div class="lightButton">
+                                        <ha-icon icon="mdi:launch">
+                                    </div>
+                                </div>
+                                <div class="timeRemainning">
+                                    <div class="timeStatus">
+                                        Status: Off
+                                    </div>
+                                    <div class="remaining">
+                                    </div>
+                                </div>
+                            </div>`: ""}
                 </div>
             </div>
         `;
     }
 
+    _handleClick(entity) {
+        fireEvent(this, "hass-more-info", { entityId: entity });
+    }
+
+    _formatDate(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        hours = hours < 10 ? '0'+hours : hours;
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        var strTime = hours + ':' + minutes;
+        return date.getDate() + " " + date.toLocaleDateString("fr-fr", {month: 'long'}) + " " + date.getFullYear() + " à " + strTime;
+      }
+
     getBottomBar() {
+        const poolTemperatureObj = this.hass.states[this.config.poolTemperatureEntity];
+        const poolPhObj = this.hass.states[this.config.poolPhEntity];
+        const poolChlorineObj = this.hass.states[this.config.poolChlorineEntity];
         return html`
         <div class="poolCardBottom">
             <div class="emptyDivContainer">
                 <div class="emptyDiv"></div>
-                <div class="phGauge">
-                    <div class="phIcon" style="background-color:#F9B302;">
-                        <ha-icon icon="mdi:ph"/>
-                    </div>
-                    <div class="phCanvas">
-                        <canvas height="70" width="100"" id="phGauge"></ canvas>
-                    </div>
-                    <div class="phValue">
-                            7,5
-                    </div>
-                    <div class="phDate">
-                        25 mars 2023 à 11:24
-                    </div>
-                </div>
+                ${poolPhObj ?
+                    html`
+                        <div class="phGauge" @click="${() => {this._handleClick(this.config.poolPhEntity)}}">
+                            <div class="phIcon">
+                                <ha-icon icon="mdi:ph"/>
+                            </div><div class="phCanvas">
+                                <canvas height="70" width="100"" id="phGauge"></ canvas>
+                            </div>
+                            <div class="phValue">
+                                ${parseFloat(poolPhObj.state).toFixed(1)}
+                            </div>
+                            <div class="phDate">
+                            ${this._formatDate(new Date(poolPhObj.attributes["last_update"]))}
+                            </div>
+                        </div>`
+                    : html``
+                }
             </div>
-            <div class="temperatureGauge">
-                <div class="temperatureIcon">
-                    <ha-icon icon="mdi:thermometer"/>
-                </div>
-                <div class="temperatureCanvas">
-                    <canvas height="100" width="150"" id="temperatureGauge"></ canvas>
-                </div>
-                <div class="temperatureValue">
-                        13.6
-                </div>
-                <div class="chlorineDate">
-                    31 mars 2023 à 15:54
-                </div>
-            </div>
+            ${poolTemperatureObj ?
+                html`
+                    <div class="temperatureGauge" @click="${() => {this._handleClick(this.config.poolTemperatureEntity)}}">
+                        <div class="temperatureIcon">
+                            <ha-icon icon="mdi:thermometer"/>
+                        </div>
+                        <div class="temperatureCanvas">
+                            <canvas height="100" width="150"" id="temperatureGauge"></ canvas>
+                        </div>
+                        <div class="temperatureValue">
+                            ${parseFloat(poolTemperatureObj.state).toFixed(1)}
+                        </div>
+                        <div class="chlorineDate">
+                            ${this._formatDate(new Date(poolTemperatureObj.attributes["last_update"]))}
+                        </div>
+                    </div>`
+                : html``
+            }
             <div class="emptyDivContainer">
                 <div class="emptyDiv"></div>
-                <div class="chlorineGauge">
-                    <div class="chlorineIcon">
-                        <ha-icon icon="mdi:water-outline"/>
-                    </div>
-                    <div class="chlorineCanvas">
-                        <canvas height="70" width="100"" id="chlorineGauge"></ canvas>
-                    </div>
-                    <div class="chlorineValue">
-                            580
-                    </div>
-                    <div class="chlorineDate">
-                        27 mars 2023 à 09:24
-                    </div>
-                </div>
+                ${poolChlorineObj ?
+                    html`
+                        <div class="chlorineGauge" @click="${() => {this._handleClick(this.config.poolChlorineEntity)}}">
+                            <div class="chlorineIcon">
+                                <ha-icon icon="mdi:water-outline"/>
+                            </div>
+                            <div class="chlorineCanvas">
+                                <canvas height="70" width="100"" id="chlorineGauge"></ canvas>
+                            </div>
+                            <div class="chlorineValue">
+                                ${poolChlorineObj.state}
+                            </div>
+                            <div class="chlorineDate">
+                                ${this._formatDate(new Date(poolChlorineObj.attributes["last_update"]))}
+                            </div>
+                        </div>`
+                    : html``
+                }
             </div>
         </div>
         `;
@@ -324,6 +373,7 @@ class EasyCareCard extends LitElement {
     }
 
     createTemperatureGauge(target) {
+        const poolTemperatureObj = this.hass.states[this.config.poolTemperatureEntity];
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
         // Replade :
@@ -390,7 +440,7 @@ class EasyCareCard extends LitElement {
         gauge.maxValue = 35; // set max gauge value
         gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
         gauge.animationSpeed = 32; // set animation speed (32 is default value)
-        gauge.set(13.6); // set actual value;
+        gauge.set(poolTemperatureObj.state); // set actual value;
     }
 
     createChlorineGauge(target) {
@@ -473,7 +523,7 @@ class EasyCareCard extends LitElement {
     }
 
    getStyles() {
-        const poolDetailObj =  this.hass.states["sensor.pool_detail"];
+        const poolDetailObj = this.hass.states[this.config.poolDetailEntity];
         return html`
         <style>
             .poolCard {
@@ -483,6 +533,7 @@ class EasyCareCard extends LitElement {
                 justify-content: space-between;
                 border-radius: 12px;
                 min-height: 400px;
+                background-position: center;
             }
             .poolCardTitleContainer {
                 display:flex;
