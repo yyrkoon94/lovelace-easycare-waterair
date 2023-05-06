@@ -6,8 +6,7 @@
 
 A [Home Assistant][home-assistant] Lovelace Card to display Waterair Pool with EasyCare connection.
 
-
-
+![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot1.png)
 
 <!-- Badges -->
 [release-badge]: https://img.shields.io/github/v/release/yyrkoon94/lovelace-easycare-waterair?style=flat-square
