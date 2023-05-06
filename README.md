@@ -6,6 +6,8 @@
 
 A [Home Assistant][home-assistant] Lovelace Card to display Waterair Pool with EasyCare connection.
 
+This Card needs the Custom Component [EasyCare for Waterair][ha-easycare-waterair] to be installed first.
+
 ![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot1.png)
 
 ## Installation
@@ -31,6 +33,18 @@ type: custom:easy-care-card
 Then clic on the code editor, you will see this page :
 ![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/cardeditor.png)
 
+Just fill the Entities and you will see the different part of the Card appears.
+
+If you want to do it manually (or if the Card Editor doesn't work), you can use this template :
+```
+type: custom:easy-care-card
+poolDetailEntity: sensor.easycare_pool_detail
+poolTemperatureEntity: sensor.easy_care_pool_temperature
+poolPhEntity: sensor.easy_care_pool_ph
+poolChlorineEntity: sensor.easy_care_pool_chlorine
+poolConnectionEntity: binary_sensor.easy_care_connection
+```
+
 <!-- Badges -->
 [release-badge]: https://img.shields.io/github/v/release/yyrkoon94/lovelace-easycare-waterair?style=flat-square
 [downloads-badge]: https://img.shields.io/github/downloads/yyrkoon94/lovelace-easycare-waterair/total?style=flat-square
@@ -40,4 +54,5 @@ Then clic on the code editor, you will see this page :
 [home-assitant-theme-docs]: https://www.home-assistant.io/integrations/frontend/#defining-themes
 [hacs]: https://hacs.xyz
 [release-url]: https://github.com/yyrkoon94/lovelace-easycare-waterair/releases
+[ha-easycare-waterair]: https://github.com/yyrkoon94/ha-easycare-waterair
 
