@@ -529,17 +529,20 @@ class EasyCareCard extends LitElement {
     }
 
    getStyles() {
-        const poolDetailObj = this.hass.states[this.config.poolDetailEntity];
+       const poolDetailObj = this.hass.states[this.config.poolDetailEntity];
+       const imagesUrl = new URL('images/', import.meta.url).href
+       var image = imagesUrl + "pool.jpg"
+       if (poolDetailObj.attributes.pool_custom_photo && poolDetailObj.attributes.pool_custom_photo != "")
+           image = "http://easycare.waterair.com/"+poolDetailObj.attributes.pool_custom_photo
         return html`
         <style>
             .poolCard {
-                background-image: url(http://easycare.waterair.com/${poolDetailObj.attributes.pool_custom_photo});
+                background-image: url(${image});
                 display:flex;
                 flex-direction:column;
                 justify-content: space-between;
                 border-radius: 12px;
                 min-height: 400px;
-                background-position: center;
             }
             .poolCardTitleContainer {
                 display:flex;
