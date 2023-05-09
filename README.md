@@ -43,6 +43,7 @@ poolTemperatureEntity: sensor.easy_care_pool_temperature
 poolPhEntity: sensor.easy_care_pool_ph
 poolChlorineEntity: sensor.easy_care_pool_chlorine
 poolConnectionEntity: binary_sensor.easy_care_connection
+poolNotificationEntity: sensor.easy_care_pool_notification
 ```
 
 <!-- Badges -->
