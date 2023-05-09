@@ -148,11 +148,18 @@ class EasyCareCard extends LitElement {
                     <div class="poolBodyMiddle">
                         <div class="emptyBodyMiddleDiv">
                         </div>
+
                         ${poolNotification ?
                             html`<div class="poolTreatmentMessage">
-                                    Votre Traitement Easy Pool 2
+                                    <div>Votre Traitement Easy Pool</div>
+                                    <div class="poolTreatmentNotificationDate">
+                                        ${this._formatDate(new Date(poolNotification.attributes["last_update"]))}
+                                    </div>
                                 </div>`
                             : ""}
+                        ${poolNotification ?
+                            html`<div class="actionsTodo">Actions À Mener</div>` : ""
+                        }
                     </div>
                     ${escaLight?
                         html`
@@ -696,15 +703,29 @@ class EasyCareCard extends LitElement {
             }
             .poolTreatmentMessage {
                 display: flex;
+                flex-direction: column;
                 background-color:#F9B302;
                 border-radius: 12px;
-                height: 40px;
-                width: 95%;
+                width: 250px;
                 justify-content: center;
                 align-items: center;
+                padding-top: 3px;
                 color:#FFFFFF;
+                font-size: 16px;
+                font-weight: 500;
+            }
+            .poolTreatmentNotificationDate {
+                font-size: 8px;
+            }
+            .actionsTodo {
+                background: rgba(0, 0, 0, 0.7);
+                border-radius: 12px;
+                padding: 5px 10px 5px 10px;
+                margin-bottom: 5px;
+                color: #FFFFFF;
                 font-size: 14px;
                 font-weight: 500;
+                font-variant-caps: small-caps;
             }
             .emptyBodyMiddleDiv {
                 display: flex;
