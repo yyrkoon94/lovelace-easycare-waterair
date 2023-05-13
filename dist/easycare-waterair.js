@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 0.0.3 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 0.0.4 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -94,8 +94,8 @@ class EasyCareCard extends LitElement {
                         ${poolDetailObj.state}
                     </div>
                     <div class="zoneMessage">
-                    ${poolNotification ?
-                        "Votre piscine a besoin de vous": ""}
+                    ${poolNotification && poolNotification.state != 'None' ?
+                        "Votre piscine a besoin de vous": "Tout va bien !"}
                     </div>
                     <div class="zoneVolume">
                         ${poolDetailObj.attributes.pool_volume}m3
@@ -149,7 +149,7 @@ class EasyCareCard extends LitElement {
                         <div class="emptyBodyMiddleDiv">
                         </div>
 
-                        ${poolNotification ?
+                        ${poolNotification && poolNotification.state != 'None' ?
                             html`<div class="poolTreatmentMessage">
                                     <div>Votre Traitement Easy Pool</div>
                                     <div class="poolTreatmentNotificationDate">
@@ -157,7 +157,7 @@ class EasyCareCard extends LitElement {
                                     </div>
                                 </div>`
                             : ""}
-                        ${poolNotification ?
+                        ${poolNotification && poolNotification.state != 'None' ?
                             html`<div class="actionsTodo">Actions À Mener</div>` : ""
                         }
                     </div>
