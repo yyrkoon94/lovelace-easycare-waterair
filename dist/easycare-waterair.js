@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 0.0.5 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 0.0.6 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -86,6 +86,7 @@ class EasyCareCard extends LitElement {
     getTitleBar() {
         const poolDetailObj = this.hass.states[this.config.poolDetailEntity];
         const poolNotification = this.hass.states[this.config.poolNotificationEntity];
+        const poolTreatment = this.hass.states[this.config.poolTreatmentEntity];
         const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
         return html`
             <div class="poolCardTitleContainer">
@@ -94,7 +95,7 @@ class EasyCareCard extends LitElement {
                         ${poolDetailObj.state}
                     </div>
                     <div class="zoneMessage">
-                    ${poolNotification && poolNotification.state != 'None' ?
+                    ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ?
                         "Votre piscine a besoin de vous": "Tout va bien !"}
                     </div>
                     <div class="zoneVolume">
