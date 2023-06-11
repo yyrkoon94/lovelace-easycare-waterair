@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 0.0.4 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 0.0.5 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -113,6 +113,7 @@ class EasyCareCard extends LitElement {
 
     getBodyContent() {
         const poolNotification = this.hass.states[this.config.poolNotificationEntity];
+        const poolTreatment = this.hass.states[this.config.poolTreatmentEntity];
         const spotLight = this.hass.states[this.config.spotLightEntity];
         const escaLight = this.hass.states[this.config.escalightEntity];
         return html`
@@ -148,16 +149,23 @@ class EasyCareCard extends LitElement {
                     <div class="poolBodyMiddle">
                         <div class="emptyBodyMiddleDiv">
                         </div>
-
                         ${poolNotification && poolNotification.state != 'None' ?
                             html`<div class="poolTreatmentMessage">
-                                    <div>Votre Traitement Easy Pool</div>
+                                    <div style="text-align: center;">Votre Traitement Easy Pool</div>
                                     <div class="poolTreatmentNotificationDate">
                                         ${this._formatDate(new Date(poolNotification.attributes["last_update"]))}
                                     </div>
                                 </div>`
                             : ""}
-                        ${poolNotification && poolNotification.state != 'None' ?
+                        ${poolTreatment && poolTreatment.state != 'None' ?
+                            html`<div class="poolTreatmentMessage">
+                                    <div style="text-align: center;">Une action corrective est disponible</div>
+                                    <div class="poolTreatmentNotificationDate">
+                                        ${this._formatDate(new Date(poolTreatment.attributes["last_update"]))}
+                                    </div>
+                                </div>`
+                            : ""}
+                        ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None') ?
                             html`<div class="actionsTodo">Actions À Mener</div>` : ""
                         }
                     </div>

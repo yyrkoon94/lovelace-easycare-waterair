@@ -61,6 +61,10 @@ class EasyCareCardEditor extends LitElement {
       return this._config.poolNotificationEntity || "";
     }
 
+    get _poolTreatmentEntity() {
+      return this._config.poolTreatmentEntity || "";
+    }
+
     render() {
         if (!this.hass) {
           return html``;
@@ -109,6 +113,13 @@ class EasyCareCardEditor extends LitElement {
                         .hass="${this.hass}"
                         .value="${this._poolNotificationEntity}"
                         .configValue=${"poolNotificationEntity"}
+                        @value-changed="${this._valueChanged}"
+                        ></ha-entity-picker>
+                    <ha-entity-picker
+                        label="Pool Treatment"
+                        .hass="${this.hass}"
+                        .value="${this._poolTreatmentEntity}"
+                        .configValue=${"poolTreatmentEntity"}
                         @value-changed="${this._valueChanged}"
                         ></ha-entity-picker>
                 </div>
