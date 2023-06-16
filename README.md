@@ -7,7 +7,8 @@ A [Home Assistant][home-assistant] Lovelace Card to display Waterair Pool with E
 
 This Card needs the Custom Component [EasyCare for Waterair][ha-easycare-waterair] to be installed first.
 
-![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot1.png)
+![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot0.png)
+![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot2.png)
 
 ## Installation
 
@@ -37,12 +38,7 @@ Just fill the Entities and you will see the different part of the Card appears.
 If you want to do it manually (or if the Card Editor doesn't work), you can use this template :
 ```
 type: custom:easy-care-card
-poolDetailEntity: sensor.easycare_pool_detail
-poolTemperatureEntity: sensor.easy_care_pool_temperature
-poolPhEntity: sensor.easy_care_pool_ph
-poolChlorineEntity: sensor.easy_care_pool_chlorine
 poolConnectionEntity: binary_sensor.easy_care_connection
-poolNotificationEntity: sensor.easy_care_pool_notification
 ```
 
 <!-- Badges -->
