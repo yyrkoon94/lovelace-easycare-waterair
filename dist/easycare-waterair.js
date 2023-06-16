@@ -5,7 +5,7 @@ import {
 
 import "./gauge.min.js?module";
 
-const timerValues = ["Off", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00"]
+const timerValues = ["01:00", "02:00", "03:00", "04:00", "05:00", "06:00"]
 
 const fireEvent = (node, type, detail, options) => {
     options = options || {};
@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 0.0.6 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.0 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -32,10 +32,6 @@ class EasyCareCard extends LitElement {
 
     constructor() {
         super();
-        this.timers = {
-            spot: 0,
-            escalight: 0,
-        }
     }
 
     static async getConfigElement() {
@@ -62,17 +58,14 @@ class EasyCareCard extends LitElement {
     }
 
     firstUpdated(changedProperties) {
-        if (this.config.poolPhEntity)
-            this.createPhGauge(this.shadowRoot.getElementById("phGauge"));
-        if (this.config.poolTemperatureEntity)
-            this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"));
-        if (this.config.poolChlorineEntity)
-            this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"));
+        this.createPhGauge(this.shadowRoot.getElementById("phGauge"));
+        this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"));
+        this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"));
     }
 
     setConfig(config) {
-        if (!config.poolDetailEntity) {
-            throw new Error("You need to define a poolDetailEntity");
+        if (!config.poolConnectionEntity) {
+            throw new Error("You need to define a poolConnectionEntity");
         }
         this.config = config;
     }
@@ -84,10 +77,10 @@ class EasyCareCard extends LitElement {
     }
 
     getTitleBar() {
-        const poolDetailObj = this.hass.states[this.config.poolDetailEntity];
-        const poolNotification = this.hass.states[this.config.poolNotificationEntity];
-        const poolTreatment = this.hass.states[this.config.poolTreatmentEntity];
         const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
+        const poolDetailObj = this.hass.states["sensor.easycare_pool_detail"];
+        const poolNotification = this.hass.states["sensor.easy_care_pool_notification"];
+        const poolTreatment = this.hass.states["sensor.easy_care_pool_treatment"];
         return html`
             <div class="poolCardTitleContainer">
                 <div class="poolCardTitle">
@@ -113,10 +106,12 @@ class EasyCareCard extends LitElement {
     }
 
     getBodyContent() {
-        const poolNotification = this.hass.states[this.config.poolNotificationEntity];
-        const poolTreatment = this.hass.states[this.config.poolTreatmentEntity];
-        const spotLight = this.hass.states[this.config.spotLightEntity];
-        const escaLight = this.hass.states[this.config.escalightEntity];
+        const poolNotification = this.hass.states["sensor.easy_care_pool_notification"];
+        const poolTreatment = this.hass.states["sensor.easy_care_pool_treatment"];
+        const spotLight = this.hass.states["light.easy_care_pool_spot"];
+        const spotLightDuration = this.hass.states["number.easy_care_pool_spot_light_duration_in_hours"];
+        const escaLight = this.hass.states["light.easy_care_pool_escalight"];
+        const escaLightDuration = this.hass.states["number.easy_care_pool_escalight_light_duration_in_hours"];
         return html`
             <div class="poolCardBodyContainer">
                 <div class="poolBodyTop">
@@ -126,24 +121,24 @@ class EasyCareCard extends LitElement {
                         html`<div class="poolBodyLightLeft">
                             <div class="lightName">
                                 <div class="lightText">Spot</div>
-                                <div class="lightImage" style="color:yellow">
+                                <div class="lightImage" style="${spotLight.state == "on" ? "color:yellow" : ""}">
                                     <ha-icon icon="mdi:lightbulb-on">
                                 </div>
                             </div>
                             <div class="timerContainer">
                                 <div class="selectTimer">
-                                    ${this.createTimer("spot")}
+                                    ${this.createTimer("spot", spotLight, spotLightDuration)}
                                 </div>
                                 <div class="lightButton">
-                                    <ha-icon icon="mdi:launch">
+                                    <ha-icon icon="mdi:launch" @click="${() => {this._manageLight(spotLight)}}">
                                 </div>
                             </div>
                             <div class="timeRemainning">
                                 <div class="timeStatus">
-                                    Status:&nbsp;<span style="color:yellow;font-weight: bold;">On</span>
+                                    <span style="${spotLight.state == "on" ? "color:yellow;font-weight: bold;": ""}">${spotLight.state  == "on" ? "Allumé" : "Eteint"}</span>
                                 </div>
                                 <div class="remaining">
-                                    00:42
+                                    ${spotLight.state == "on" ? spotLight.attributes["remaining_time"] : ""}
                                 </div>
                             </div>
                         </div>`: ""}
@@ -175,25 +170,26 @@ class EasyCareCard extends LitElement {
                             <div class="poolBodyLightRight">
                                 <div class="lightName">
                                     <div class="lightText">Escalight</div>
-                                    <div class="lightImage">
-                                    <ha-icon icon="mdi:light-recessed"></ha-icon>
-                                    <ha-icon icon="mdi:light-recessed"></ha-icon>
-                                    <ha-icon icon="mdi:light-recessed"></ha-icon>
+                                    <div class="lightImage" style="${escaLight.state == "on" ? "color:yellow" : ""}">
+                                        <ha-icon icon="mdi:light-recessed"></ha-icon>
+                                        <ha-icon icon="mdi:light-recessed"></ha-icon>
+                                        <ha-icon icon="mdi:light-recessed"></ha-icon>
                                     </div>
                                 </div>
                                 <div class="timerContainer">
                                     <div class="selectTimer">
-                                        ${this.createTimer("escalight")}
+                                        ${this.createTimer("escalight", escaLight, escaLightDuration)}
                                     </div>
                                     <div class="lightButton">
-                                        <ha-icon icon="mdi:launch">
+                                        <ha-icon icon="mdi:launch" @click="${() => {this._manageLight(escaLight)}}">
                                     </div>
                                 </div>
                                 <div class="timeRemainning">
                                     <div class="timeStatus">
-                                        Status: Off
+                                        <span style="${escaLight.state == "on" ? "color:yellow;font-weight: bold;": ""}">${escaLight.state == "on" ? "Allumé" : "Eteint"}</span>
                                     </div>
                                     <div class="remaining">
+                                        ${escaLight.state == "on" ? escaLight.attributes["remaining_time"]  : ""}
                                     </div>
                                 </div>
                             </div>`: ""}
@@ -203,7 +199,14 @@ class EasyCareCard extends LitElement {
     }
 
     _handleClick(entity) {
-        fireEvent(this, "hass-more-info", { entityId: entity });
+        fireEvent(this, "hass-more-info", { entityId: entity.entity_id });
+    }
+
+    _manageLight(entity) {
+        if (entity.state == "on")
+            this.hass.callService('light', 'turn_off', { entity_id: entity.entity_id })
+        else
+            this.hass.callService('light', 'turn_on', { entity_id: entity.entity_id })
     }
 
     _formatDate(date) {
@@ -216,16 +219,16 @@ class EasyCareCard extends LitElement {
       }
 
     getBottomBar() {
-        const poolTemperatureObj = this.hass.states[this.config.poolTemperatureEntity];
-        const poolPhObj = this.hass.states[this.config.poolPhEntity];
-        const poolChlorineObj = this.hass.states[this.config.poolChlorineEntity];
+        const poolTemperatureObj = this.hass.states["sensor.easy_care_pool_temperature"];
+        const poolPhObj = this.hass.states["sensor.easy_care_pool_ph"];
+        const poolChlorineObj = this.hass.states["sensor.easy_care_pool_chlorine"];
         return html`
         <div class="poolCardBottom">
             <div class="emptyDivContainer">
                 <div class="emptyDiv"></div>
                 ${poolPhObj ?
                     html`
-                        <div class="phGauge" @click="${() => {this._handleClick(this.config.poolPhEntity)}}">
+                        <div class="phGauge" @click="${() => {this._handleClick(poolPhObj)}}">
                             <div class="phIcon">
                                 <ha-icon icon="mdi:ph"/>
                             </div><div class="phCanvas">
@@ -243,7 +246,7 @@ class EasyCareCard extends LitElement {
             </div>
             ${poolTemperatureObj ?
                 html`
-                    <div class="temperatureGauge" @click="${() => {this._handleClick(this.config.poolTemperatureEntity)}}">
+                    <div class="temperatureGauge" @click="${() => {this._handleClick(poolTemperatureObj)}}">
                         <div class="temperatureIcon">
                             <ha-icon icon="mdi:thermometer"/>
                         </div>
@@ -263,7 +266,7 @@ class EasyCareCard extends LitElement {
                 <div class="emptyDiv"></div>
                 ${poolChlorineObj ?
                     html`
-                        <div class="chlorineGauge" @click="${() => {this._handleClick(this.config.poolChlorineEntity)}}">
+                        <div class="chlorineGauge" @click="${() => {this._handleClick(poolChlorineObj)}}">
                             <div class="chlorineIcon">
                                 <ha-icon icon="mdi:water-outline"/>
                             </div>
@@ -284,35 +287,36 @@ class EasyCareCard extends LitElement {
         `;
     }
 
-    createTimer(timer) {
+    createTimer(timer, entity, durationObj) {
         return html`
             <div class="timerComponent">
-                <div class="timerButtonLeft" @click="${() => {this.clickTimerLeft(timer)}}"> <ha-icon icon="mdi:minus"/></div>
-                <div class="timerValue">${timerValues[this.timers[timer]]}</div>
-                <div class="timerButtonRight" @click="${() => {this.clickTimerRight(timer)}}"> <ha-icon icon="mdi:plus"/></div>
+                ${entity.state == "off" ?
+                    html`<div class="timerButtonLeft" @click="${() => {this.clickTimerLeft(timer, durationObj)}}"> <ha-icon icon="mdi:minus"/></div>`
+                    : "" }
+                <div class="timerValue">${entity.state == "on" ? "Off" : timerValues[parseInt(durationObj.state) - 1]}</div>
+                ${entity.state == "off" ?
+                    html`<div class="timerButtonRight" @click="${() => {this.clickTimerRight(timer, durationObj)}}"> <ha-icon icon="mdi:plus"/></div>`
+                    : "" }
             </div>
         `;
     }
 
-    clickTimerLeft(timer) {
-        if (this.timers[timer] == 0)
-            this.timers[timer] = timerValues.length - 1;
+    clickTimerLeft(timer, durationObj) {
+        if (parseInt(durationObj.state) - 1 == 0)
+            this.hass.callService( 'number','set_value', { entity_id: durationObj.entity_id, value: timerValues.length+".0" } )
         else
-            this.timers[timer] = this.timers[timer] - 1;
-
-        this.requestUpdate();
+            this.hass.callService('number', 'set_value', { entity_id: durationObj.entity_id, value: (parseInt(durationObj.state) - 1) + ".0" })
     }
 
-    clickTimerRight(timer) {
-        if (this.timers[timer] == timerValues.length - 1)
-            this.timers[timer] = 0;
+    clickTimerRight(timer, durationObj) {
+        if (parseInt(durationObj.state) == timerValues.length)
+            this.hass.callService( 'number','set_value', { entity_id: durationObj.entity_id, value: "1.0" } )
         else
-            this.timers[timer] = this.timers[timer] + 1;
-
-        this.requestUpdate();
+            this.hass.callService('number', 'set_value', { entity_id: durationObj.entity_id, value: (parseInt(durationObj.state) + 1) + ".0" })
     }
 
     createPhGauge(target) {
+        const poolPhObj = this.hass.states["sensor.easy_care_pool_ph"];
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
         // Replade :
@@ -369,12 +373,12 @@ class EasyCareCard extends LitElement {
                 strokeWidth: 0.057, // The thickness
                 color: '#FFFFFF' // Fill color
             },
-            limitMax: false,     // If false, max value increases automatically if value > maxValue
-            limitMin: false,     // If true, the min value of the gauge will be fixed
+            limitMax: true,     // If false, max value increases automatically if value > maxValue
+            limitMin: true,     // If true, the min value of the gauge will be fixed
             colorStart: '#6FADCF',   // Colors
             colorStop: '#8FC0DA',    // just experiment with them
             strokeColor: '#E0E0E0',  // to see which ones work best for you
-            generateGradient: true,
+            generateGradient: false,
             highDpiSupport: true,     // High resolution support
             // renderTicks is Optional
             renderTicks: {
@@ -392,11 +396,11 @@ class EasyCareCard extends LitElement {
         gauge.maxValue = 10; // set max gauge value
         gauge.setMinValue(3);  // Prefer setter over gauge.minValue = 0
         gauge.animationSpeed = 32; // set animation speed (32 is default value)
-        gauge.set(7.5); // set actual value;
+        gauge.set(poolPhObj.state); // set actual value;
     }
 
     createTemperatureGauge(target) {
-        const poolTemperatureObj = this.hass.states[this.config.poolTemperatureEntity];
+        const poolTemperatureObj = this.hass.states["sensor.easy_care_pool_temperature"];
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
         // Replade :
@@ -440,12 +444,12 @@ class EasyCareCard extends LitElement {
                 strokeWidth: 0.057, // The thickness
                 color: '#FFFFFF' // Fill color
             },
-            limitMax: false,     // If false, max value increases automatically if value > maxValue
-            limitMin: false,     // If true, the min value of the gauge will be fixed
+            limitMax: true,     // If false, max value increases automatically if value > maxValue
+            limitMin: true,     // If true, the min value of the gauge will be fixed
             colorStart: '#6FADCF',   // Colors
             colorStop: '#8FC0DA',    // just experiment with them
             strokeColor: '#E0E0E0',  // to see which ones work best for you
-            generateGradient: true,
+            generateGradient: false,
             highDpiSupport: true,     // High resolution support
             // renderTicks is Optional
             renderTicks: {
@@ -467,6 +471,7 @@ class EasyCareCard extends LitElement {
     }
 
     createChlorineGauge(target) {
+        const poolChlorineObj = this.hass.states["sensor.easy_care_pool_chlorine"];
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
         // Replade :
@@ -519,12 +524,12 @@ class EasyCareCard extends LitElement {
                 strokeWidth: 0.057, // The thickness
                 color: '#FFFFFF' // Fill color
             },
-            limitMax: false,     // If false, max value increases automatically if value > maxValue
-            limitMin: false,     // If true, the min value of the gauge will be fixed
+            limitMax: true,     // If false, max value increases automatically if value > maxValue
+            limitMin: true,     // If true, the min value of the gauge will be fixed
             colorStart: '#6FADCF',   // Colors
             colorStop: '#8FC0DA',    // just experiment with them
             strokeColor: '#E0E0E0',  // to see which ones work best for you
-            generateGradient: true,
+            generateGradient: false,
             highDpiSupport: true,     // High resolution support
             // renderTicks is Optional
             renderTicks: {
@@ -542,11 +547,11 @@ class EasyCareCard extends LitElement {
         gauge.maxValue = 1200; // set max gauge value
         gauge.setMinValue(200);  // Prefer setter over gauge.minValue = 0
         gauge.animationSpeed = 32; // set animation speed (32 is default value)
-        gauge.set(580); // set actual value;
+        gauge.set(poolChlorineObj.state); // set actual value;
     }
 
    getStyles() {
-       const poolDetailObj = this.hass.states[this.config.poolDetailEntity];
+       const poolDetailObj = this.hass.states["sensor.easycare_pool_detail"];
        const imagesUrl = new URL('images/', import.meta.url).href
        var image = imagesUrl + "pool.jpg"
        if (poolDetailObj.attributes.pool_custom_photo && poolDetailObj.attributes.pool_custom_photo != "")

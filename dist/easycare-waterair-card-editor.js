@@ -41,30 +41,6 @@ class EasyCareCardEditor extends LitElement {
       return this._config.poolConnectionEntity || "";
     }
 
-    get _poolDetailEntity() {
-        return this._config.poolDetailEntity || "";
-    }
-
-    get _poolTemperatureEntity() {
-      return this._config.poolTemperatureEntity || "";
-    }
-
-    get _poolPhEntity() {
-      return this._config.poolPhEntity || "";
-    }
-
-    get _poolChlorineEntity() {
-      return this._config.poolChlorineEntity || "";
-    }
-
-    get _poolNotificationEntity() {
-      return this._config.poolNotificationEntity || "";
-    }
-
-    get _poolTreatmentEntity() {
-      return this._config.poolTreatmentEntity || "";
-    }
-
     render() {
         if (!this.hass) {
           return html``;
@@ -80,48 +56,6 @@ class EasyCareCardEditor extends LitElement {
                       .configValue=${"poolConnectionEntity"}
                       @value-changed="${this._valueChanged}"
                       ></ha-entity-picker>
-                    <ha-entity-picker
-                        label="Pool Detail Entity"
-                        .hass="${this.hass}"
-                        .value="${this._poolDetailEntity}"
-                        .configValue=${"poolDetailEntity"}
-                        @value-changed="${this._valueChanged}"
-                        ></ha-entity-picker>
-                    <ha-entity-picker
-                        label="Pool Temperature"
-                        .hass="${this.hass}"
-                        .value="${this._poolTemperatureEntity}"
-                        .configValue=${"poolTemperatureEntity"}
-                        @value-changed="${this._valueChanged}"
-                        ></ha-entity-picker>
-                    <ha-entity-picker
-                        label="Pool Ph"
-                        .hass="${this.hass}"
-                        .value="${this._poolPhEntity}"
-                        .configValue=${"poolPhEntity"}
-                        @value-changed="${this._valueChanged}"
-                        ></ha-entity-picker>
-                    <ha-entity-picker
-                        label="Pool Chlorine"
-                        .hass="${this.hass}"
-                        .value="${this._poolChlorineEntity}"
-                        .configValue=${"poolChlorineEntity"}
-                        @value-changed="${this._valueChanged}"
-                        ></ha-entity-picker>
-                    <ha-entity-picker
-                        label="Pool Notifications"
-                        .hass="${this.hass}"
-                        .value="${this._poolNotificationEntity}"
-                        .configValue=${"poolNotificationEntity"}
-                        @value-changed="${this._valueChanged}"
-                        ></ha-entity-picker>
-                    <ha-entity-picker
-                        label="Pool Treatment"
-                        .hass="${this.hass}"
-                        .value="${this._poolTreatmentEntity}"
-                        .configValue=${"poolTreatmentEntity"}
-                        @value-changed="${this._valueChanged}"
-                        ></ha-entity-picker>
                 </div>
           </div>
           `;
