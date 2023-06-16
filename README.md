@@ -7,7 +7,8 @@ A [Home Assistant][home-assistant] Lovelace Card to display Waterair Pool with E
 
 This Card needs the Custom Component [EasyCare for Waterair][ha-easycare-waterair] to be installed first.
 
-![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot1.png)
+![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot0.png)
+![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot2.png)
 
 ## Installation
 
