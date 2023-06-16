@@ -31,19 +31,14 @@ type: custom:easy-care-card
 ```
 
 Then clic on the code editor, you will see this page :
-![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/cardeditor.png)
+
 
 Just fill the Entities and you will see the different part of the Card appears.
 
 If you want to do it manually (or if the Card Editor doesn't work), you can use this template :
 ```
 type: custom:easy-care-card
-poolDetailEntity: sensor.easycare_pool_detail
-poolTemperatureEntity: sensor.easy_care_pool_temperature
-poolPhEntity: sensor.easy_care_pool_ph
-poolChlorineEntity: sensor.easy_care_pool_chlorine
 poolConnectionEntity: binary_sensor.easy_care_connection
-poolNotificationEntity: sensor.easy_care_pool_notification
 ```
 
 <!-- Badges -->
