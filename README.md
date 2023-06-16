@@ -31,7 +31,7 @@ type: custom:easy-care-card
 ```
 
 Then clic on the code editor, you will see this page :
-
+![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/cardeditor.png)
 
 Just fill the Entities and you will see the different part of the Card appears.
 
