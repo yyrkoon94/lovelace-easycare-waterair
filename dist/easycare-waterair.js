@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.0 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.1 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -720,10 +720,11 @@ class EasyCareCard extends LitElement {
                 flex-direction: column;
                 background-color:#F9B302;
                 border-radius: 12px;
-                width: 250px;
+                width: 210px;
                 justify-content: center;
                 align-items: center;
                 padding-top: 3px;
+                margin-bottom: 10px;
                 color:#FFFFFF;
                 font-size: 16px;
                 font-weight: 500;
