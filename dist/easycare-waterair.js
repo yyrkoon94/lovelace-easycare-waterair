@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.2 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.3 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -145,9 +145,17 @@ class EasyCareCard extends LitElement {
                     <div class="poolBodyMiddle">
                         <div class="emptyBodyMiddleDiv">
                         </div>
-                        ${poolNotification && poolNotification.state != 'None' ?
+                        ${poolNotification && poolNotification.state != 'None' && poolNotification.state == "shouldDoChlorineTreatment" ?
                             html`<div class="poolTreatmentMessage">
                                     <div style="text-align: center;">Votre Traitement Easy Pool</div>
+                                    <div class="poolTreatmentNotificationDate">
+                                        ${this._formatDate(new Date(poolNotification.attributes["last_update"]))}
+                                    </div>
+                                </div>`
+                            : ""}
+                        ${poolNotification && poolNotification.state != 'None' && poolNotification.state == "shouldBeCalibrated" ?
+                            html`<div class="poolTreatmentMessage">
+                                    <div style="text-align: center;">Votre AC1 devrait être calibré</div>
                                     <div class="poolTreatmentNotificationDate">
                                         ${this._formatDate(new Date(poolNotification.attributes["last_update"]))}
                                     </div>
@@ -215,7 +223,7 @@ class EasyCareCard extends LitElement {
         hours = hours < 10 ? '0'+hours : hours;
         minutes = minutes < 10 ? '0'+minutes : minutes;
         var strTime = hours + ':' + minutes;
-        return date.getDate() + " " + date.toLocaleDateString("fr-fr", {month: 'long'}) + " " + date.getFullYear() + " à " + strTime;
+        return date.getDate() + " " + date.toLocaleDateString("fr-fr", {month: 'short'}) + " " + date.getFullYear() + " à " + strTime;
       }
 
     getBottomBar() {
@@ -726,6 +734,8 @@ class EasyCareCard extends LitElement {
                 justify-content: center;
                 align-items: center;
                 padding-top: 3px;
+                padding-left: 5px;
+                padding-right: 5px;
                 margin-bottom: 10px;
                 color:#FFFFFF;
                 font-size: 16px;
@@ -842,6 +852,7 @@ class EasyCareCard extends LitElement {
             .phDate {
                 display: flex;
                 justify-content: center;
+                text-align: center;
                 margin-top: 5px;
                 font-size: 12px;
                 color: #FFFFFF;
@@ -883,6 +894,7 @@ class EasyCareCard extends LitElement {
             .temperatureDate {
                 display: flex;
                 justify-content: center;
+                text-align: center;
                 margin-top: 5px;
                 font-size: 12px;
                 color: #FFFFFF;
@@ -924,6 +936,7 @@ class EasyCareCard extends LitElement {
             .chlorineDate {
                 display: flex;
                 justify-content: center;
+                text-align: center;
                 margin-top: 5px;
                 font-size: 12px;
                 color: #FFFFFF;
