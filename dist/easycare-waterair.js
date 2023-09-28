@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.3 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.4 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -145,22 +145,14 @@ class EasyCareCard extends LitElement {
                     <div class="poolBodyMiddle">
                         <div class="emptyBodyMiddleDiv">
                         </div>
-                        ${poolNotification && poolNotification.state != 'None' && poolNotification.state == "shouldDoChlorineTreatment" ?
-                            html`<div class="poolTreatmentMessage">
-                                    <div style="text-align: center;">Votre Traitement Easy Pool</div>
+                        ${Object.keys(poolNotification.attributes["all_notifications"]).map(notification => {
+                            return html`<div class="poolTreatmentMessage">
+                                    <div style="text-align: center;">${poolNotification.attributes["all_notifications"][notification].notification == "shouldDoChlorineTreatment" ? "Votre Traitement Easy Pool": "Votre AC1 devrait être calibré"}</div>
                                     <div class="poolTreatmentNotificationDate">
-                                        ${this._formatDate(new Date(poolNotification.attributes["last_update"]))}
+                                        ${this._formatDate(new Date(poolNotification.attributes["all_notifications"][notification]["last_update"]))}
                                     </div>
                                 </div>`
-                            : ""}
-                        ${poolNotification && poolNotification.state != 'None' && poolNotification.state == "shouldBeCalibrated" ?
-                            html`<div class="poolTreatmentMessage">
-                                    <div style="text-align: center;">Votre AC1 devrait être calibré</div>
-                                    <div class="poolTreatmentNotificationDate">
-                                        ${this._formatDate(new Date(poolNotification.attributes["last_update"]))}
-                                    </div>
-                                </div>`
-                            : ""}
+                        })}
                         ${poolTreatment && poolTreatment.state != 'None' ?
                             html`<div class="poolTreatmentMessage">
                                     <div style="text-align: center;">Une action corrective est disponible</div>
