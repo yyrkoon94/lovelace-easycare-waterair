@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.4 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.5 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -146,8 +146,8 @@ class EasyCareCard extends LitElement {
                         <div class="emptyBodyMiddleDiv">
                         </div>
                         ${Object.keys(poolNotification.attributes["all_notifications"]).map(notification => {
-                            return html`<div class="poolTreatmentMessage">
-                                    <div style="text-align: center;">${poolNotification.attributes["all_notifications"][notification].notification == "shouldDoChlorineTreatment" ? "Votre Traitement Easy Pool": "Votre AC1 devrait être calibré"}</div>
+                            return html`<div class="${poolNotification.attributes["all_notifications"][notification].notification == "gatewayConnectivityLost" ? "poolTreatmentMessageGateway" : "poolTreatmentMessage"}">
+                                    <div style="text-align: center;">${poolNotification.attributes["all_notifications"][notification].notification == "shouldDoChlorineTreatment" ? "Votre Traitement Easy Pool" : poolNotification.attributes["all_notifications"][notification].notification == "shouldBeCalibrated" ? "Votre AC1 devrait être calibré" : "WATBOX déconnectée"}</div>
                                     <div class="poolTreatmentNotificationDate">
                                         ${this._formatDate(new Date(poolNotification.attributes["all_notifications"][notification]["last_update"]))}
                                     </div>
@@ -721,6 +721,22 @@ class EasyCareCard extends LitElement {
                 display: flex;
                 flex-direction: column;
                 background-color:#F9B302;
+                border-radius: 12px;
+                width: 210px;
+                justify-content: center;
+                align-items: center;
+                padding-top: 3px;
+                padding-left: 5px;
+                padding-right: 5px;
+                margin-bottom: 10px;
+                color:#FFFFFF;
+                font-size: 16px;
+                font-weight: 500;
+            }
+            .poolTreatmentMessageGateway {
+                display: flex;
+                flex-direction: column;
+                background-color: #EE6002;
                 border-radius: 12px;
                 width: 210px;
                 justify-content: center;
