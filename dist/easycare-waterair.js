@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.5 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.6 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -145,14 +145,14 @@ class EasyCareCard extends LitElement {
                     <div class="poolBodyMiddle">
                         <div class="emptyBodyMiddleDiv">
                         </div>
-                        ${Object.keys(poolNotification.attributes["all_notifications"]).map(notification => {
+                        ${poolNotification && poolNotification.attributes["all_notifications"] && poolNotification.attributes["all_notifications"] != 'None' ? Object.keys(poolNotification.attributes["all_notifications"]).map(notification => {
                             return html`<div class="${poolNotification.attributes["all_notifications"][notification].notification == "gatewayConnectivityLost" ? "poolTreatmentMessageGateway" : "poolTreatmentMessage"}">
                                     <div style="text-align: center;">${poolNotification.attributes["all_notifications"][notification].notification == "shouldDoChlorineTreatment" ? "Votre Traitement Easy Pool" : poolNotification.attributes["all_notifications"][notification].notification == "shouldBeCalibrated" ? "Votre AC1 devrait être calibré" : "WATBOX déconnectée"}</div>
                                     <div class="poolTreatmentNotificationDate">
                                         ${this._formatDate(new Date(poolNotification.attributes["all_notifications"][notification]["last_update"]))}
                                     </div>
                                 </div>`
-                        })}
+                        }):""}
                         ${poolTreatment && poolTreatment.state != 'None' ?
                             html`<div class="poolTreatmentMessage">
                                     <div style="text-align: center;">Une action corrective est disponible</div>
@@ -480,41 +480,41 @@ class EasyCareCard extends LitElement {
         //   i=this.canvas.height,e=this.canvas.width
         var opts = {
             staticZones: [
-                {strokeStyle: '#fc8500', min: 200, max: 212},
-                {strokeStyle: '#f98b00', min: 212, max: 224},
-                {strokeStyle: '#f69200', min: 224, max: 236},
-                {strokeStyle: '#f29900', min: 236, max: 248},
-                {strokeStyle: '#eba200', min: 248, max: 260},
-                {strokeStyle: '#e7a800', min: 260, max: 272},
-                {strokeStyle: '#e1af00', min: 272, max: 284},
-                {strokeStyle: '#d9b700', min: 284, max: 296},
-                {strokeStyle: '#d1be00', min: 296, max: 308},
-                {strokeStyle: '#c7c600', min: 308, max: 320},
-                {strokeStyle: '#bbcd0c', min: 320, max: 332},
-                {strokeStyle: '#add51c', min: 332, max: 344},
-                {strokeStyle: '#9cdc2c', min: 344, max: 356},
-                {strokeStyle: '#87e33b', min: 356, max: 368},
-                {strokeStyle: '#6beb4a', min: 368, max: 380},
-                {strokeStyle: '#40f25b', min: 380, max: 392},
+                {strokeStyle: '#fc8500', min: 150, max: 208},
+                {strokeStyle: '#f98b00', min: 208, max: 216},
+                {strokeStyle: '#f69200', min: 216, max: 224},
+                {strokeStyle: '#f29900', min: 224, max: 232},
+                {strokeStyle: '#eba200', min: 232, max: 240},
+                {strokeStyle: '#e7a800', min: 240, max: 248},
+                {strokeStyle: '#e1af00', min: 248, max: 256},
+                {strokeStyle: '#d9b700', min: 256, max: 264},
+                {strokeStyle: '#d1be00', min: 264, max: 272},
+                {strokeStyle: '#c7c600', min: 272, max: 280},
+                {strokeStyle: '#bbcd0c', min: 280, max: 288},
+                {strokeStyle: '#add51c', min: 288, max: 296},
+                {strokeStyle: '#9cdc2c', min: 296, max: 304},
+                {strokeStyle: '#87e33b', min: 304, max: 312},
+                {strokeStyle: '#6beb4a', min: 312, max: 320},
+                {strokeStyle: '#40f25b', min: 320, max: 328},
 
-                {strokeStyle: "#40f25b", min: 392, max: 1008}, // Green
+                {strokeStyle: "#40f25b", min: 328, max: 680}, // Green
 
-                {strokeStyle: '#40f25b', min: 1008, max: 1020},
-                {strokeStyle: '#6beb4a', min: 1020, max: 1032},
-                {strokeStyle: '#87e33b', min: 1032, max: 1044},
-                {strokeStyle: '#9cdc2c', min: 1044, max: 1056},
-                {strokeStyle: '#add51c', min: 1056, max: 1068},
-                {strokeStyle: '#bbcd0c', min: 1068, max: 1080},
-                {strokeStyle: '#c7c600', min: 1080, max: 1092},
-                {strokeStyle: '#d1be00', min: 1092, max: 1104},
-                {strokeStyle: '#d9b700', min: 1104, max: 1116},
-                {strokeStyle: '#e1af00', min: 1116, max: 1128},
-                {strokeStyle: '#e7a800', min: 1128, max: 1140},
-                {strokeStyle: '#eba200', min: 1140, max: 1152},
-                {strokeStyle: '#f29900', min: 1152, max: 1164},
-                {strokeStyle: '#f69200', min: 1164, max: 1176},
-                {strokeStyle: '#f98b00', min: 1176, max: 1188},
-                {strokeStyle: '#fc8500', min: 1188, max: 1200},
+                {strokeStyle: '#40f25b', min: 680, max: 688},
+                {strokeStyle: '#6beb4a', min: 688, max: 696},
+                {strokeStyle: '#87e33b', min: 696, max: 704},
+                {strokeStyle: '#9cdc2c', min: 704, max: 712},
+                {strokeStyle: '#add51c', min: 712, max: 720},
+                {strokeStyle: '#bbcd0c', min: 720, max: 728},
+                {strokeStyle: '#c7c600', min: 728, max: 736},
+                {strokeStyle: '#d1be00', min: 736, max: 744},
+                {strokeStyle: '#d9b700', min: 744, max: 752},
+                {strokeStyle: '#e1af00', min: 752, max: 760},
+                {strokeStyle: '#e7a800', min: 760, max: 768},
+                {strokeStyle: '#eba200', min: 768, max: 776},
+                {strokeStyle: '#f29900', min: 776, max: 784},
+                {strokeStyle: '#f69200', min: 784, max: 792},
+                {strokeStyle: '#f98b00', min: 792, max: 800},
+                {strokeStyle: '#fc8500', min: 800, max: 850},
             ],
             angle: -0.1, // The span of the gauge arc
             lineWidth: 0.12, // The line thickness
@@ -544,8 +544,8 @@ class EasyCareCard extends LitElement {
             }
         };
         var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
-        gauge.maxValue = 1200; // set max gauge value
-        gauge.setMinValue(200);  // Prefer setter over gauge.minValue = 0
+        gauge.maxValue = 850; // set max gauge value
+        gauge.setMinValue(150);  // Prefer setter over gauge.minValue = 0
         gauge.animationSpeed = 32; // set animation speed (32 is default value)
         gauge.set(poolChlorineObj.state); // set actual value;
     }
