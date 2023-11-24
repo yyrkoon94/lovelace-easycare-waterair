@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.6 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.7 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -147,7 +147,7 @@ class EasyCareCard extends LitElement {
                         </div>
                         ${poolNotification && poolNotification.attributes["all_notifications"] && poolNotification.attributes["all_notifications"] != 'None' ? Object.keys(poolNotification.attributes["all_notifications"]).map(notification => {
                             return html`<div class="${poolNotification.attributes["all_notifications"][notification].notification == "gatewayConnectivityLost" ? "poolTreatmentMessageGateway" : "poolTreatmentMessage"}">
-                                    <div style="text-align: center;">${poolNotification.attributes["all_notifications"][notification].notification == "shouldDoChlorineTreatment" ? "Votre Traitement Easy Pool" : poolNotification.attributes["all_notifications"][notification].notification == "shouldBeCalibrated" ? "Votre AC1 devrait être calibré" : "WATBOX déconnectée"}</div>
+                                    <div style="text-align: center;">${poolNotification.attributes["all_notifications"][notification].notification == "shouldDoChlorineTreatment" ? "Votre Traitement Easy Pool" : poolNotification.attributes["all_notifications"][notification].notification == "shouldBeCalibrated" ? "Votre AC1 devrait être calibré" : poolNotification.attributes["all_notifications"][notification].notification == "shouldBeWintered" ? "Votre AC1 devrait être hiverné" : "WATBOX déconnectée"}</div>
                                     <div class="poolTreatmentNotificationDate">
                                         ${this._formatDate(new Date(poolNotification.attributes["all_notifications"][notification]["last_update"]))}
                                     </div>
