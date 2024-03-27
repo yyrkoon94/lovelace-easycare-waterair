@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.7 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.8 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -40,9 +40,21 @@ class EasyCareCard extends LitElement {
     }
 
     render() {
+        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
         if (!this.config || !this.hass) {
             return html``;
         }
+        if (!easyCareConnectionObj || easyCareConnectionObj.state === "unavailable")
+            return html`
+                ${this.getStyles()}
+                <ha-card>
+                    <div class="card-content" style="padding:0px;" >
+                        <div class="poolCard">
+                            ${this.getErrorContent()}
+                        </div>
+                    </div>
+                </ha-card>
+            `;
         return html`
             ${this.getStyles()}
             <ha-card>
@@ -193,6 +205,18 @@ class EasyCareCard extends LitElement {
                                     </div>
                                 </div>
                             </div>`: ""}
+                </div>
+            </div>
+        `;
+    }
+
+    getErrorContent() {
+        return html`
+            <div class="poolCardBodyContainer" style="min-height: 320px;">
+                <div class="poolBodyMiddle">
+                    <div class="poolTreatmentMessage" style="padding: 40px;width: 250px;">
+                        <div style="text-align: center;"><b style="font-size: 20px;">Le token a exipré !</b> <br/><br/> Mettre à jour la valeur dans configuration.yaml puis redémarrer Home Assistant</div>
+                    </div>
                 </div>
             </div>
         `;
