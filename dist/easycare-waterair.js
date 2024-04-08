@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.8 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.9 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -504,41 +504,41 @@ class EasyCareCard extends LitElement {
         //   i=this.canvas.height,e=this.canvas.width
         var opts = {
             staticZones: [
-                {strokeStyle: '#fc8500', min: 150, max: 208},
-                {strokeStyle: '#f98b00', min: 208, max: 216},
-                {strokeStyle: '#f69200', min: 216, max: 224},
-                {strokeStyle: '#f29900', min: 224, max: 232},
-                {strokeStyle: '#eba200', min: 232, max: 240},
-                {strokeStyle: '#e7a800', min: 240, max: 248},
-                {strokeStyle: '#e1af00', min: 248, max: 256},
-                {strokeStyle: '#d9b700', min: 256, max: 264},
-                {strokeStyle: '#d1be00', min: 264, max: 272},
-                {strokeStyle: '#c7c600', min: 272, max: 280},
-                {strokeStyle: '#bbcd0c', min: 280, max: 288},
-                {strokeStyle: '#add51c', min: 288, max: 296},
-                {strokeStyle: '#9cdc2c', min: 296, max: 304},
-                {strokeStyle: '#87e33b', min: 304, max: 312},
-                {strokeStyle: '#6beb4a', min: 312, max: 320},
-                {strokeStyle: '#40f25b', min: 320, max: 328},
+                {strokeStyle: '#fc8500', min: 450, max: 455},
+                {strokeStyle: '#f98b00', min: 455, max: 460},
+                {strokeStyle: '#f69200', min: 460, max: 465},
+                {strokeStyle: '#f29900', min: 465, max: 470},
+                {strokeStyle: '#eba200', min: 470, max: 475},
+                {strokeStyle: '#e7a800', min: 475, max: 480},
+                {strokeStyle: '#e1af00', min: 480, max: 485},
+                {strokeStyle: '#d9b700', min: 485, max: 490},
+                {strokeStyle: '#d1be00', min: 490, max: 495},
+                {strokeStyle: '#c7c600', min: 495, max: 500},
+                {strokeStyle: '#bbcd0c', min: 500, max: 505},
+                {strokeStyle: '#add51c', min: 505, max: 510},
+                {strokeStyle: '#9cdc2c', min: 510, max: 515},
+                {strokeStyle: '#87e33b', min: 515, max: 520},
+                {strokeStyle: '#6beb4a', min: 520, max: 525},
+                {strokeStyle: '#40f25b', min: 525, max: 530},
 
-                {strokeStyle: "#40f25b", min: 328, max: 680}, // Green
+                {strokeStyle: "#40f25b", min: 530, max: 770}, // Green
 
-                {strokeStyle: '#40f25b', min: 680, max: 688},
-                {strokeStyle: '#6beb4a', min: 688, max: 696},
-                {strokeStyle: '#87e33b', min: 696, max: 704},
-                {strokeStyle: '#9cdc2c', min: 704, max: 712},
-                {strokeStyle: '#add51c', min: 712, max: 720},
-                {strokeStyle: '#bbcd0c', min: 720, max: 728},
-                {strokeStyle: '#c7c600', min: 728, max: 736},
-                {strokeStyle: '#d1be00', min: 736, max: 744},
-                {strokeStyle: '#d9b700', min: 744, max: 752},
-                {strokeStyle: '#e1af00', min: 752, max: 760},
-                {strokeStyle: '#e7a800', min: 760, max: 768},
-                {strokeStyle: '#eba200', min: 768, max: 776},
-                {strokeStyle: '#f29900', min: 776, max: 784},
-                {strokeStyle: '#f69200', min: 784, max: 792},
-                {strokeStyle: '#f98b00', min: 792, max: 800},
-                {strokeStyle: '#fc8500', min: 800, max: 850},
+                {strokeStyle: '#40f25b', min: 770, max: 775},
+                {strokeStyle: '#6beb4a', min: 775, max: 780},
+                {strokeStyle: '#87e33b', min: 780, max: 785},
+                {strokeStyle: '#9cdc2c', min: 785, max: 790},
+                {strokeStyle: '#add51c', min: 790, max: 795},
+                {strokeStyle: '#bbcd0c', min: 795, max: 800},
+                {strokeStyle: '#c7c600', min: 800, max: 805},
+                {strokeStyle: '#d1be00', min: 805, max: 810},
+                {strokeStyle: '#d9b700', min: 810, max: 815},
+                {strokeStyle: '#e1af00', min: 815, max: 820},
+                {strokeStyle: '#e7a800', min: 820, max: 825},
+                {strokeStyle: '#eba200', min: 825, max: 830},
+                {strokeStyle: '#f29900', min: 830, max: 835},
+                {strokeStyle: '#f69200', min: 835, max: 840},
+                {strokeStyle: '#f98b00', min: 840, max: 845},
+                {strokeStyle: '#fc8500', min: 841, max: 850},
             ],
             angle: -0.1, // The span of the gauge arc
             lineWidth: 0.12, // The line thickness
@@ -569,7 +569,7 @@ class EasyCareCard extends LitElement {
         };
         var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
         gauge.maxValue = 850; // set max gauge value
-        gauge.setMinValue(150);  // Prefer setter over gauge.minValue = 0
+        gauge.setMinValue(450);  // Prefer setter over gauge.minValue = 0
         gauge.animationSpeed = 32; // set animation speed (32 is default value)
         gauge.set(poolChlorineObj.state); // set actual value;
     }
