@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.10 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.11 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -211,14 +211,26 @@ class EasyCareCard extends LitElement {
     }
 
     getErrorContent() {
+        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
         return html`
-            <div class="poolCardBodyContainer" style="min-height: 320px;">
-                <div class="poolBodyMiddle">
-                    <div class="poolTreatmentMessage" style="padding: 40px;width: 250px;">
-                        <div style="text-align: center;"><b style="font-size: 20px;">Le token a exipré !</b> <br/><br/> Mettre à jour la valeur dans configuration.yaml puis redémarrer Home Assistant</div>
-                    </div>
-                </div>
-            </div>
+            ${easyCareConnectionObj && easyCareConnectionObj.attributes["token_valid"] && easyCareConnectionObj.attributes["token_valid"] == true ?
+                html`
+                    <div class="poolCardBodyContainer" style="min-height: 320px;">
+                        <div class="poolBodyMiddle">
+                            <div class="poolTreatmentMessage" style="padding: 40px;width: 250px;">
+                                <div style="text-align: center;"><b style="font-size: 20px;">Le serveur EasyCare est indisponible.</b> <br/><br/> Les données seront mises à jour dès que possible.</div>
+                            </div>
+                        </div>
+                    </div>`:
+                html`
+                    <div class="poolCardBodyContainer" style="min-height: 320px;">
+                        <div class="poolBodyMiddle">
+                            <div class="poolTreatmentMessage" style="padding: 40px;width: 250px;">
+                                <div style="text-align: center;"><b style="font-size: 20px;">Le token a exipré !</b> <br/><br/> Mettre à jour la valeur dans configuration.yaml puis redémarrer Home Assistant.</div>
+                            </div>
+                        </div>
+                    </div>`
+            }
         `;
     }
 
