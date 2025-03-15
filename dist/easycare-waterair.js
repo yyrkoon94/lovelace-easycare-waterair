@@ -1,7 +1,7 @@
 import {
   LitElement,
   html,
-} from "https://unpkg.com/lit-element@2.0.1/lit-element.js?module";
+} from "./lit/lit-core.min.js"
 
 import "./gauge.min.js?module";
 
@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.12 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.13 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -996,3 +996,11 @@ class EasyCareCard extends LitElement {
     }
 }
 customElements.define("easy-care-card", EasyCareCard);
+
+window.customCards = window.customCards || [];
+window.customCards.push({
+  type: 'easy-care-card',
+  name: 'Easy Care card for Waterair',
+  preview: false,
+  description: 'Lovelace Card to display Waterair Pool details with EasyCare connection.',
+});
