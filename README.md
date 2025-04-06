@@ -7,8 +7,8 @@ A [Home Assistant][home-assistant] Lovelace Card to display Waterair Pool with E
 
 This Card needs the Custom Component [EasyCare for Waterair][ha-easycare-waterair] to be installed first.
 
-![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot0.png)
-![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot2.png)
+![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot3.png)
+![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/screenshot4.png)
 
 ## Installation
 
@@ -34,6 +34,11 @@ Then clic on the code editor, you will see this page :
 ![Screenshot](https://raw.githubusercontent.com/yyrkoon94/lovelace-easycare-waterair/master/cardeditor1.png)
 
 Just fill the Entities and you will see the different part of the Card appears.
+
+You can choose different options :
+- Small card display : display a small version of the card
+- Use transparent display : display the card in "transparent" color
+- Display background image : display the pool background image
 
 If you want to do it manually (or if the Card Editor doesn't work), you can use this template :
 ```

@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.0.13 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.1.0 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -40,16 +40,17 @@ class EasyCareCard extends LitElement {
     }
 
     render() {
-        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
         if (!this.config || !this.hass) {
             return html``;
         }
-        if (!easyCareConnectionObj || easyCareConnectionObj.state === "unavailable")
+        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
+        if (!easyCareConnectionObj || easyCareConnectionObj.state === "unavailable" || easyCareConnectionObj.state === "off")
             return html`
                 ${this.getStyles()}
-                <ha-card>
+                <ha-card style="${this.config.background != undefined && !this.config.background ? "background-color: rgba(255, 255, 255, 0.1);" : ""}">
                     <div class="card-content" style="padding:0px;" >
-                        <div class="poolCard">
+                        <div class="poolCard" style="justify-content: normal;${this.config.small!=undefined && this.config.small ? "min-height: 0px !important;": ""} ${this.config.background!= undefined && !this.config.background ? "background-image: none;" : ""}">
+                            ${this.getTitleBarError()}
                             ${this.getErrorContent()}
                         </div>
                     </div>
@@ -57,11 +58,11 @@ class EasyCareCard extends LitElement {
             `;
         return html`
             ${this.getStyles()}
-            <ha-card>
+            <ha-card style="${this.config.background!= undefined && !this.config.background ? "background-color: rgba(255, 255, 255, 0.1);" : ""}">
                 <div class="card-content" style="padding:0px;" >
-                    <div class="poolCard">
+                    <div class="poolCard" style="${this.config.small!=undefined && this.config.small ? "min-height: 0px !important;": ""} ${this.config.background!= undefined && !this.config.background ? "background-image: none;" : ""}">
                         ${this.getTitleBar()}
-                        ${this.getBodyContent()}
+                        ${this.config.small!=undefined && this.config.small ? this.getBodyContentSmall() : this.getBodyContent()}
                         ${this.getBottomBar()}
                     </div>
                 </div>
@@ -70,9 +71,12 @@ class EasyCareCard extends LitElement {
     }
 
     firstUpdated(changedProperties) {
-        this.createPhGauge(this.shadowRoot.getElementById("phGauge"));
-        this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"));
-        this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"));
+        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
+        if (!easyCareConnectionObj || easyCareConnectionObj.state === "unavailable" || easyCareConnectionObj.state === "off")
+            return;
+        this.createPhGauge(this.shadowRoot.getElementById("phGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+        this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+        this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
     }
 
     setConfig(config) {
@@ -95,7 +99,7 @@ class EasyCareCard extends LitElement {
         const poolTreatment = this.hass.states["sensor.easy_care_pool_treatment"];
         return html`
             <div class="poolCardTitleContainer">
-                <div class="poolCardTitle">
+                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ? "title-alert":""}">
                     <div class="zoneNom">
                         ${poolDetailObj.state}
                     </div>
@@ -108,9 +112,30 @@ class EasyCareCard extends LitElement {
                     </div>
                 </div>
                 ${easyCareConnectionObj ?
-                    html`<div class="poolCardTitleIndicators">
-                        <div class="poolCardTitleConnected">
-                            <ha-icon icon="${easyCareConnectionObj.state === "on" ? "mdi:network-outline" : "mdi:network-off-outline"}" style="height: 40px;margin-left: 5px;">
+                    html`<div class="poolCardTitleIndicators${this.config.small!=undefined && this.config.small ? "-small": ""} ${this.config.transparent && this.config.transparent == true && (!this.config.small) ? "transparent" : ""}">
+                        <div class="poolCardTitleConnected${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""}${this.config.small!=undefined && this.config.small? "-small": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" >
+                            <ha-icon icon="${easyCareConnectionObj.state === "on" ? "mdi:network-outline" : "mdi:network-off-outline"}" style="height: 25px;margin-left: 5px;">
+                        </div>
+                    </div>`: "" }
+            </div>
+        `;
+    }
+
+    getTitleBarError() {
+        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
+        const poolNotification = this.hass.states["sensor.easy_care_pool_notification"];
+        const poolTreatment = this.hass.states["sensor.easy_care_pool_treatment"];
+        return html`
+            <div class="poolCardTitleContainer">
+                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ? "title-alert":""}">
+                    <div class="zoneMessage">
+                        Impossible de se connecter au serveur EasyCare
+                    </div>
+                </div>
+                ${easyCareConnectionObj ?
+                    html`<div class="poolCardTitleIndicators ${this.config.transparent && this.config.transparent == true  ? "transparent" : ""}">
+                        <div class="poolCardTitleConnected${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" >
+                            <ha-icon icon="${easyCareConnectionObj.state === "on" ? "mdi:network-outline" : "mdi:network-off-outline"}" style="height: 25px;margin-left: 5px;">
                         </div>
                     </div>`: "" }
             </div>
@@ -125,19 +150,19 @@ class EasyCareCard extends LitElement {
         const escaLight = this.hass.states["light.easy_care_pool_escalight"];
         const escaLightDuration = this.hass.states["number.easy_care_pool_escalight_light_duration_in_hours"];
         return html`
-            <div class="poolCardBodyContainer">
+            <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true ? "transparent transparent-font" : ""}">
                 <div class="poolBodyTop">
                 </div>
                 <div class="poolBodyLightContainer">
                     ${spotLight?
-                        html`<div class="poolBodyLightLeft">
-                            <div class="lightName">
-                                <div class="lightText">Spot</div>
-                                <div class="lightImage" style="${spotLight.state == "on" ? "color:yellow" : ""}">
+                        html`<div class="poolBodyLightLeft${this.config.transparent && this.config.transparent == true ? "-transparent" : ""}">
+                            <div class="lightName ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
+                                <div class="lightText" style="padding-bottom: 2px;">Spot</div>
+                                <div class="lightImage" style="margin-bottom:2px;border-radius:18px;padding:5px;${spotLight.state == "on" ? "color:yellow;" : ""}${this.config.transparent && this.config.transparent == true  && spotLight.state == "on" ? "background: #a1a1a1;":""}">
                                     <ha-icon icon="mdi:lightbulb-on">
                                 </div>
                             </div>
-                            <div class="timerContainer">
+                            <div class="timerContainer ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
                                 <div class="selectTimer">
                                     ${this.createTimer("spot", spotLight, spotLightDuration)}
                                 </div>
@@ -145,11 +170,11 @@ class EasyCareCard extends LitElement {
                                     <ha-icon icon="mdi:launch" @click="${() => {this._manageLight(spotLight)}}">
                                 </div>
                             </div>
-                            <div class="timeRemainning">
-                                <div class="timeStatus">
+                            <div class="timeRemainning ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
+                                <div class="timeStatus ${this.config.transparent && this.config.transparent == true && spotLight.state == "on" ? "text-shadow" : ""}">
                                     <span style="${spotLight.state == "on" ? "color:yellow;font-weight: bold;": ""}">${spotLight.state  == "on" ? "Allumé" : "Eteint"}</span>
                                 </div>
-                                <div class="remaining">
+                                <div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}">
                                     ${spotLight.state == "on" ? spotLight.attributes["remaining_time"] : ""}
                                 </div>
                             </div>
@@ -185,16 +210,16 @@ class EasyCareCard extends LitElement {
                     </div>
                     ${escaLight?
                         html`
-                            <div class="poolBodyLightRight">
-                                <div class="lightName">
+                            <div class="poolBodyLightRight${this.config.transparent && this.config.transparent == true ? "-transparent" : ""}">
+                                <div class="lightName ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
                                     <div class="lightText">Escalight</div>
-                                    <div class="lightImage" style="${escaLight.state == "on" ? "color:yellow" : ""}">
+                                    <div class="lightImage" style="border-radius:18px;padding:0px 5px 0px 5px;${escaLight.state == "on" ? "color:yellow;" : ""}${this.config.transparent && this.config.transparent == true  && escaLight.state == "on" ? "background: #a1a1a1;":""}">
                                         <ha-icon icon="mdi:light-recessed"></ha-icon>
                                         <ha-icon icon="mdi:light-recessed"></ha-icon>
                                         <ha-icon icon="mdi:light-recessed"></ha-icon>
                                     </div>
                                 </div>
-                                <div class="timerContainer">
+                                <div class="timerContainer ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
                                     <div class="selectTimer">
                                         ${this.createTimer("escalight", escaLight, escaLightDuration)}
                                     </div>
@@ -202,12 +227,50 @@ class EasyCareCard extends LitElement {
                                         <ha-icon icon="mdi:launch" @click="${() => {this._manageLight(escaLight)}}">
                                     </div>
                                 </div>
-                                <div class="timeRemainning">
-                                    <div class="timeStatus">
+                                <div class="timeRemainning ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
+                                    <div class="timeStatus ${this.config.transparent && this.config.transparent == true && escaLight.state == "on" ? "text-shadow" : ""}">
                                         <span style="${escaLight.state == "on" ? "color:yellow;font-weight: bold;": ""}">${escaLight.state == "on" ? "Allumé" : "Eteint"}</span>
                                     </div>
-                                    <div class="remaining">
+                                    <div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}"">
                                         ${escaLight.state == "on" ? escaLight.attributes["remaining_time"]  : ""}
+                                    </div>
+                                </div>
+                            </div>`: ""}
+                </div>
+            </div>
+        `;
+    }
+
+    getBodyContentSmall() {
+        const spotLight = this.hass.states["light.easy_care_pool_spot"];
+        const spotLightDuration = this.hass.states["number.easy_care_pool_spot_light_duration_in_hours"];
+        const escaLight = this.hass.states["light.easy_care_pool_escalight"];
+        const escaLightDuration = this.hass.states["number.easy_care_pool_escalight_light_duration_in_hours"];
+        return html`
+            <div class="poolCardBodyContainer-small ${this.config.transparent && this.config.transparent == true ? "transparent transparent-font" : ""}">
+                <div class="poolBodyLightContainer-small ${(this.config.transparent && this.config.transparent == true) ? "transparent-font" : ""}">
+                    ${spotLight?
+                        html`<div class="poolBodyLightLeft${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-transparent" : ""}" style="border: 0px !important;">
+                            <div class="lightZone ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
+                                <div class="lightText" style="padding-bottom:0px;">Spot</div>
+                                <div class="lightImage" style="margin-left: 8px;margin-right: 5px;border-radius: 18px;margin-bottom: 0px;padding:5px;${spotLight.state == "on" ? "color:yellow;" : ""}${this.config.transparent && this.config.transparent == true  && spotLight.state == "on" ? "background: #a1a1a1;":""}">
+                                    <ha-icon icon="mdi:lightbulb-on">
+                                </div>
+                            </div>
+                        </div>`: ""}
+                     <div class="poolBodyMiddle" style="flex: 3;">
+                        <div class="emptyBodyMiddleDiv">
+                        </div>
+                    </div>
+                    ${escaLight?
+                        html`
+                            <div class="poolBodyLightRight${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-transparent" : ""}" style="border: 0px !important;margin-right: 4px;margin-top:4px;">
+                                <div class="lightZone ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
+                                    <div class="lightText" style="padding-bottom:0px;">Escalight</div>
+                                    <div class="lightImage" style="margin-left: 8px;margin-right: 5px;border-radius: 18px;margin-bottom: 0px;padding:0px 5px 0px 5px;${escaLight.state == "on" ? "color:yellow;" : ""}${this.config.transparent && this.config.transparent == true  && escaLight.state == "on" ? "background: #a1a1a1;":""}">
+                                        <ha-icon icon="mdi:light-recessed"></ha-icon>
+                                        <ha-icon icon="mdi:light-recessed"></ha-icon>
+                                        <ha-icon icon="mdi:light-recessed"></ha-icon>
                                     </div>
                                 </div>
                             </div>`: ""}
@@ -219,19 +282,19 @@ class EasyCareCard extends LitElement {
     getErrorContent() {
         const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
         return html`
-            ${easyCareConnectionObj && easyCareConnectionObj.attributes["token_valid"] && easyCareConnectionObj.attributes["token_valid"] == true ?
+            ${(easyCareConnectionObj && easyCareConnectionObj.attributes["token_valid"] && easyCareConnectionObj.attributes["token_valid"] == true) || !easyCareConnectionObj || easyCareConnectionObj.state === "unavailable" ?
                 html`
-                    <div class="poolCardBodyContainer" style="min-height: 320px;">
-                        <div class="poolBodyMiddle">
-                            <div class="poolTreatmentMessage" style="padding: 40px;width: 250px;">
+                    <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""}" style="align-items: center;${this.config.small!=undefined && this.config.small ? "" : "min-height: 350px !important;"}">
+                        <div class="poolBodyMiddle" style="flex-direction: row;">
+                            <div class="poolTreatmentMessage" style="${this.config.small!=undefined && this.config.small ? "padding: 10px;width: 250px;" : "padding: 25px;width: 250px;"}">
                                 <div style="text-align: center;"><b style="font-size: 20px;">Le serveur EasyCare est indisponible.</b> <br/><br/> Les données seront mises à jour dès que possible.</div>
                             </div>
                         </div>
                     </div>`:
                 html`
-                    <div class="poolCardBodyContainer" style="min-height: 320px;">
-                        <div class="poolBodyMiddle">
-                            <div class="poolTreatmentMessage" style="padding: 40px;width: 250px;">
+                    <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} " style="align-items: center;${this.config.small!=undefined && this.config.small ? "" : "min-height: 350px !important;"}">
+                        <div class="poolBodyMiddle" style="flex-direction: row;">
+                            <div class="poolTreatmentMessage" style="${this.config.small!=undefined && this.config.small ? "padding: 10px;width: 250px;" : "padding: 25px;width: 250px;"}">
                                 <div style="text-align: center;"><b style="font-size: 20px;">Le token a exipré !</b> <br/><br/> Mettre à jour la valeur dans configuration.yaml puis redémarrer Home Assistant.</div>
                             </div>
                         </div>
@@ -258,29 +321,37 @@ class EasyCareCard extends LitElement {
         minutes = minutes < 10 ? '0'+minutes : minutes;
         var strTime = hours + ':' + minutes;
         return date.getDate() + " " + date.toLocaleDateString("fr-fr", {month: 'short'}) + " " + date.getFullYear() + " à " + strTime;
-      }
+    }
 
     getBottomBar() {
         const poolTemperatureObj = this.hass.states["sensor.easy_care_pool_temperature"];
         const poolPhObj = this.hass.states["sensor.easy_care_pool_ph"];
         const poolChlorineObj = this.hass.states["sensor.easy_care_pool_chlorine"];
+        const spotLight = this.hass.states["light.easy_care_pool_spot"];
+        const escaLight = this.hass.states["light.easy_care_pool_escalight"];
         return html`
         <div class="poolCardBottom">
             <div class="emptyDivContainer">
-                <div class="emptyDiv"></div>
+                <div class="emptyDiv${this.config.small!=undefined && this.config.small ? "-small" : ""} ${this.config.transparent && this.config.transparent == true ? "transparent" : ""}">
+                    ${this.config.small!=undefined && this.config.small ?
+                        html`<div class="timeRemainning ${this.config.transparent && this.config.transparent == true ? " transparent-font" : ""}" style="width:100%;margin-top: 0px;">
+                            ${spotLight.state == "on" ? html`<div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}" style="color: #21718c !important;">${spotLight.attributes["remaining_time"]}</div>` : html`<div class="eteint">Eteint</div>`}
+                            </div>`: ""}
+                </div>
                 ${poolPhObj ?
                     html`
-                        <div class="phGauge" @click="${() => {this._handleClick(poolPhObj)}}">
+                        <div class="phGauge ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "border-top" : ""}" @click="${() => {this._handleClick(poolPhObj)}}">
                             <div class="phIcon">
                                 <ha-icon icon="mdi:ph"/>
-                            </div><div class="phCanvas">
+                            </div>
+                            <div class="phCanvas">
                                 <canvas height="70" width="100"" id="phGauge"></ canvas>
                             </div>
                             <div class="phValue">
                                 ${parseFloat(poolPhObj.state).toFixed(1)}
                             </div>
                             <div class="phDate">
-                            ${this._formatDate(new Date(poolPhObj.attributes["last_update"]))}
+                                ${this._formatDate(new Date(poolPhObj.attributes["last_update"]))}
                             </div>
                         </div>`
                     : html``
@@ -288,7 +359,11 @@ class EasyCareCard extends LitElement {
             </div>
             ${poolTemperatureObj ?
                 html`
-                    <div class="temperatureGauge" @click="${() => {this._handleClick(poolTemperatureObj)}}">
+                    <div class="temperatureGauge ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""}" style="${(this.config.transparent && this.config.transparent == true) || ((!this.config.transparent || this.config.transparent == false) && this.config.small!=undefined && this.config.small)? "border-radius: 0px;":""}" @click="${() => {this._handleClick(poolTemperatureObj)}}">
+                        ${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ?
+                            html`
+                                <div class="floating-border"></div>
+                            ` : ""}
                         <div class="temperatureIcon">
                             <ha-icon icon="mdi:thermometer"/>
                         </div>
@@ -298,17 +373,22 @@ class EasyCareCard extends LitElement {
                         <div class="temperatureValue">
                             ${parseFloat(poolTemperatureObj.state).toFixed(1)}
                         </div>
-                        <div class="chlorineDate">
+                        <div class="temperatureDate">
                             ${this._formatDate(new Date(poolTemperatureObj.attributes["last_update"]))}
                         </div>
                     </div>`
                 : html``
             }
             <div class="emptyDivContainer">
-                <div class="emptyDiv"></div>
+                <div class="emptyDiv${this.config.small!=undefined && this.config.small ? "-small" : ""} ${this.config.transparent && this.config.transparent == true ? "transparent" : ""}">
+                    ${this.config.small!=undefined && this.config.small ?
+                        html`<div class="timeRemainning ${this.config.transparent && this.config.transparent == true ? " transparent-font" : ""}" style="width:100%;margin-top: 0px;">
+                            ${escaLight.state == "on" ? html`<div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}" style="color: #21718c !important;">${escaLight.attributes["remaining_time"]}</div>` : html`<div class="eteint">Eteint</div>`}
+                            </div>`: ""}
+                </div>
                 ${poolChlorineObj ?
                     html`
-                        <div class="chlorineGauge" @click="${() => {this._handleClick(poolChlorineObj)}}">
+                        <div class="chlorineGauge ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "border-top" : ""}" " @click="${() => {this._handleClick(poolChlorineObj)}}">
                             <div class="chlorineIcon">
                                 <ha-icon icon="mdi:water-outline"/>
                             </div>
@@ -331,7 +411,7 @@ class EasyCareCard extends LitElement {
 
     createTimer(timer, entity, durationObj) {
         return html`
-            <div class="timerComponent">
+            <div class="timerComponent ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}"">
                 ${entity.state == "off" ?
                     html`<div class="timerButtonLeft" @click="${() => {this.clickTimerLeft(timer, durationObj)}}"> <ha-icon icon="mdi:minus"/></div>`
                     : "" }
@@ -357,7 +437,8 @@ class EasyCareCard extends LitElement {
             this.hass.callService('number', 'set_value', { entity_id: durationObj.entity_id, value: (parseInt(durationObj.state) + 1) + ".0" })
     }
 
-    createPhGauge(target) {
+    createPhGauge(target, color) {
+        const colorGauge = color ? color : "#FFFFFF";
         const poolPhObj = this.hass.states["sensor.easy_care_pool_ph"];
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
@@ -369,7 +450,7 @@ class EasyCareCard extends LitElement {
             staticLabels: {
                 font: "10px sans-serif",  // Specifies font
                 labels: [4, 5, 6, 7, 8, 9],  // Print labels at these values
-                color: "#FFFFFF",  // Optional: Label text color
+                color: colorGauge,  // Optional: Label text color
                 fractionDigits: 0  // Optional: Numerical precision. 0=round off.
             },
             staticZones: [
@@ -413,7 +494,7 @@ class EasyCareCard extends LitElement {
             pointer: {
                 length: 0.5, // // Relative to gauge radius
                 strokeWidth: 0.057, // The thickness
-                color: '#FFFFFF' // Fill color
+                color: colorGauge // Fill color
             },
             limitMax: true,     // If false, max value increases automatically if value > maxValue
             limitMin: true,     // If true, the min value of the gauge will be fixed
@@ -427,11 +508,11 @@ class EasyCareCard extends LitElement {
                 divisions: 14,
                 divWidth: 1,
                 divLength: 0.5,
-                divColor: '#FFFFFF',
+                divColor: colorGauge,
                 subDivisions: 0,
                 subLength: 0,
                 subWidth: 0,
-                subColor: '#FFFFF'
+                subColor: colorGauge
             }
         };
         var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
@@ -441,7 +522,8 @@ class EasyCareCard extends LitElement {
         gauge.set(poolPhObj.state); // set actual value;
     }
 
-    createTemperatureGauge(target) {
+    createTemperatureGauge(target, color) {
+        const colorGauge = color ? color : "#FFFFFF";
         const poolTemperatureObj = this.hass.states["sensor.easy_care_pool_temperature"];
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
@@ -453,7 +535,7 @@ class EasyCareCard extends LitElement {
             staticLabels: {
                 font: "10px sans-serif",  // Specifies font
                 labels: [0, 12, 28, 35],  // Print labels at these values
-                color: "#FFFFFF",  // Optional: Label text color
+                color: colorGauge,  // Optional: Label text color
                 fractionDigits: 0  // Optional: Numerical precision. 0=round off.
             },
             staticZones: [
@@ -484,7 +566,7 @@ class EasyCareCard extends LitElement {
             pointer: {
                 length: 0.5, // // Relative to gauge radius
                 strokeWidth: 0.057, // The thickness
-                color: '#FFFFFF' // Fill color
+                color: colorGauge // Fill color
             },
             limitMax: true,     // If false, max value increases automatically if value > maxValue
             limitMin: true,     // If true, the min value of the gauge will be fixed
@@ -498,11 +580,11 @@ class EasyCareCard extends LitElement {
                 divisions: 14,
                 divWidth: 1,
                 divLength: 0.5,
-                divColor: '#FFFFFF',
+                divColor: colorGauge,
                 subDivisions: 0,
                 subLength: 0,
                 subWidth: 0,
-                subColor: '#FFFFF'
+                subColor: colorGauge
             }
         };
         var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
@@ -512,7 +594,8 @@ class EasyCareCard extends LitElement {
         gauge.set(poolTemperatureObj.state); // set actual value;
     }
 
-    createChlorineGauge(target) {
+    createChlorineGauge(target, color) {
+        const colorGauge = color ? color : "#FFFFFF";
         const poolChlorineObj = this.hass.states["sensor.easy_care_pool_chlorine"];
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
@@ -564,7 +647,7 @@ class EasyCareCard extends LitElement {
             pointer: {
                 length: 0.5, // // Relative to gauge radius
                 strokeWidth: 0.057, // The thickness
-                color: '#FFFFFF' // Fill color
+                color: colorGauge // Fill color
             },
             limitMax: true,     // If false, max value increases automatically if value > maxValue
             limitMin: true,     // If true, the min value of the gauge will be fixed
@@ -578,11 +661,11 @@ class EasyCareCard extends LitElement {
                 divisions: 14,
                 divWidth: 1,
                 divLength: 0.5,
-                divColor: '#FFFFFF',
+                divColor: colorGauge,
                 subDivisions: 0,
                 subLength: 0,
                 subWidth: 0,
-                subColor: '#FFFFF'
+                subColor: colorGauge
             }
         };
         var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
@@ -607,10 +690,26 @@ class EasyCareCard extends LitElement {
                 justify-content: space-between;
                 border-radius: 12px;
                 min-height: 400px;
+                color: #FFFFFF;
+            }
+
+            .transparent {
+                background-color: rgba(255, 255, 255, 0.7) !important;
+            }
+            .text-shadow {
+                text-shadow: 1px 1px 0px black;
+                color: #21718c !important;
+            }
+            .transparent-font {
+                color: #000000 !important;
             }
             .poolCardTitleContainer {
                 display:flex;
                 flex-direction:column;
+            }
+            .title-alert {
+                background: rgb(150,21,21,0.7) !important;
+                color: #FFFFFF !important;
             }
             .poolCardTitle {
                 display: flex;
@@ -620,33 +719,68 @@ class EasyCareCard extends LitElement {
                 border-radius: 12px 12px 0px 0px;
                 height: 25px;
             }
+            .poolCardTitle-small {
+                display: flex;
+                justify-content: space-between;
+                width:100%;
+                background: rgba(0, 0, 0, 0.7);
+                border-radius: 12px 12px 0px 0px;
+                height: 25px;
+                border-bottom: 1px solid;
+            }
             .poolCardTitleIndicators  {
                 display: flex;
                 justify-content: space-between;
                 width:100%;
                 height: 25px;
             }
+            .poolCardTitleIndicators-small  {
+                position: absolute;
+                display: flex;
+                justify-content: center;
+                width:100%;
+                top: 26px;
+                z-index: 1;
+            }
             .poolCardTitleConnected {
                 display: flex;
-                color:#FFFFFF;
                 height: 40px;
                 width: 40px;
                 background: rgba(0, 0, 0, 0.7);
                 border-radius: 0px 0px 40px 0px;
             }
+            .poolCardTitleConnected-transparent {
+                display: flex;
+                height: 35px;
+                width: 40px;
+                border-radius: 0px 0px 40px 0px;
+                border-right: 1px solid;
+                border-bottom: 1px solid;
+                z-index: 1;
+            }
+            .poolCardTitleConnected-transparent-small {
+                display: flex;
+                height: 35px;
+                width: 40px;
+                border-radius: 0px 0px 40px 40px;
+                border-right: 1px solid;
+                border-bottom: 1px solid;
+                border-left: 1px solid;
+                padding-left: 5px;
+                z-index: 1;
+            }
             .zoneNom {
                 display: flex;
                 align-self: center;
                 padding-left: 12px;
-                color:#FFFFFF;
                 font-size: 12px;
                 font-weight: 400;
+                text-wrap-mode: nowrap;
             }
             .zoneMessage {
                 display: flex;
                 align-self: center;
                 justify-content:center;
-                color:#FFFFFF;
                 font-size: 16px;
                 font-weight: 400;
                 width: 100%;
@@ -656,7 +790,6 @@ class EasyCareCard extends LitElement {
                 align-self: center;
                 justify-content:right;
                 padding-right: 12px;
-                color:#FFFFFF;
                 font-size: 12px;
                 font-weight: 400;
             }
@@ -666,6 +799,12 @@ class EasyCareCard extends LitElement {
                 width:100%;
                 flex-direction:column;
             }
+            .poolCardBodyContainer-small {
+                display: flex;
+                justify-content: space-between;
+                width:100%;
+                background: rgba(0, 0, 0, 0.7);
+            }
             .poolBodyTop {
                 display: flex;
                 height: 20px;
@@ -673,6 +812,11 @@ class EasyCareCard extends LitElement {
             .poolBodyLightContainer {
                 display: flex;
                 height: 200px;
+            }
+            .poolBodyLightContainer-small {
+                display: flex;
+                min-height: 20px;
+                width: 100%;
             }
             .poolBodyLightLeft {
                 display: flex;
@@ -682,7 +826,17 @@ class EasyCareCard extends LitElement {
                 padding-right: 5px;
                 padding-left: 5px;
                 min-width: 100px;
-                color: #FFFFFF;
+                flex-direction: column;
+            }
+            .poolBodyLightLeft-transparent {
+                display: flex;
+                flex:2;
+                border-radius: 0px 30px 30px 0px;
+                border: 1px solid #000000;
+                border-left:0px;
+                padding-right: 5px;
+                padding-left: 5px;
+                min-width: 100px;
                 flex-direction: column;
             }
             .poolBodyLightRight {
@@ -693,7 +847,17 @@ class EasyCareCard extends LitElement {
                 padding-right: 5px;
                 padding-left: 5px;
                 min-width: 100px;
-                color: #FFFFFF;
+                flex-direction: column;
+            }
+            .poolBodyLightRight-transparent {
+                display: flex;
+                flex:2;
+                border: 1px solid #000000;
+                border-right:0px;
+                border-radius: 30px 0px 0px 30px;
+                padding-right: 5px;
+                padding-left: 5px;
+                min-width: 100px;
                 flex-direction: column;
             }
             .lightName {
@@ -702,8 +866,15 @@ class EasyCareCard extends LitElement {
                 font-size: 18px;
                 margin-top: 10px;
                 flex-direction: column;
-                border-bottom: 1px solid #FFFFFF;
+                border-bottom: 1px solid;
                 width: 95%;
+            }
+            .lightZone {
+                display: flex;
+                align-self: center;
+                font-size: 16px;
+                padding-top: 2px;
+                flex-direction: row;
             }
             .lightText {
                 display: flex;
@@ -722,7 +893,7 @@ class EasyCareCard extends LitElement {
                 font-size: 18px;
                 margin-top: 10px;
                 flex-direction: column;
-                border-bottom: 1px solid #FFFFFF;
+                border-bottom: 1px solid;
                 width: 95%;
             }
             .selectTimer {
@@ -753,6 +924,10 @@ class EasyCareCard extends LitElement {
                 color: lightblue;
                 font-weight: bold;
             }
+            .eteint {
+                display: flex;
+                align-self: center;
+            }
             .poolBodyMiddle {
                 display: flex;
                 flex: 5;
@@ -771,7 +946,6 @@ class EasyCareCard extends LitElement {
                 padding-left: 5px;
                 padding-right: 5px;
                 margin-bottom: 10px;
-                color:#FFFFFF;
                 font-size: 16px;
                 font-weight: 500;
             }
@@ -787,7 +961,6 @@ class EasyCareCard extends LitElement {
                 padding-left: 5px;
                 padding-right: 5px;
                 margin-bottom: 10px;
-                color:#FFFFFF;
                 font-size: 16px;
                 font-weight: 500;
             }
@@ -799,10 +972,10 @@ class EasyCareCard extends LitElement {
                 border-radius: 12px;
                 padding: 5px 10px 5px 10px;
                 margin-bottom: 5px;
-                color: #FFFFFF;
                 font-size: 14px;
                 font-weight: 500;
                 font-variant-caps: small-caps;
+                color: #FFFFFF;
             }
             .emptyBodyMiddleDiv {
                 display: flex;
@@ -819,7 +992,6 @@ class EasyCareCard extends LitElement {
                 justify-content: center;
                 border: 0;
                 flex: 1;
-                color: #FFFFFF;
                 font-size: 18px;
                 font-weight: bold;
                 cursor: pointer;
@@ -831,7 +1003,6 @@ class EasyCareCard extends LitElement {
                 justify-content: center;
                 flex: 2;
                 text-align: center;
-                color: #FFFFFF;
                 font-size: 20px
             }
             .timerButtonRight {
@@ -840,7 +1011,6 @@ class EasyCareCard extends LitElement {
                 justify-content: center;
                 border: 0;
                 flex: 1;
-                color: #FFFFFF;
                 font-size: 18px;
                 font-weight: bold;
                 cursor: pointer;
@@ -852,6 +1022,16 @@ class EasyCareCard extends LitElement {
                 width:100%;
                 border-radius: 0px 0px 12px 12px;
                 height: 140px;
+            }
+            .floating-border {
+                width: 100%;
+                height: 30px;
+                position: absolute;
+                top: 0px;
+                border: 1px solid;
+                border-radius: 12px 12px 0px 0px;
+                border-bottom: 0px;
+                z-index: 1;
             }
             .emptyDivContainer {
                 display: flex;
@@ -866,6 +1046,11 @@ class EasyCareCard extends LitElement {
                 display: flex;
                 height: 40px;
             }
+            .emptyDiv-small {
+                display: flex;
+                height: 40px;
+                background: rgba(0, 0, 0, 0.7);
+            }
             .phGauge {
                 display: flex;
                 align-self: center;
@@ -877,8 +1062,10 @@ class EasyCareCard extends LitElement {
                 background: rgba(0, 0, 0, 0.7);
                 border-radius: 0px 0px 0px 12px;
             }
+            .border-top {
+                border-top: 1px solid;
+            }
             .phIcon {
-                color: #FFFFFF;
                 position: absolute;
                 display: flex;
                 top: 2px;
@@ -890,7 +1077,6 @@ class EasyCareCard extends LitElement {
                 justify-content: center;
             }
             .phValue {
-                color: #FFFFFF;
                 position: absolute;
                 justify-content: center;
                 display: flex;
@@ -905,7 +1091,6 @@ class EasyCareCard extends LitElement {
                 text-align: center;
                 margin-top: 5px;
                 font-size: 12px;
-                color: #FFFFFF;
             }
             .temperatureGauge {
                 display: flex;
@@ -920,7 +1105,6 @@ class EasyCareCard extends LitElement {
                 width: 100%;
             }
             .temperatureIcon {
-                color: #FFFFFF;
                 position: absolute;
                 display: flex;
                 top: 10px;
@@ -932,7 +1116,6 @@ class EasyCareCard extends LitElement {
                 justify-content: center;
             }
             .temperatureValue {
-                color: #FFFFFF;
                 position: absolute;
                 justify-content: center;
                 display: flex;
@@ -947,7 +1130,6 @@ class EasyCareCard extends LitElement {
                 text-align: center;
                 margin-top: 5px;
                 font-size: 12px;
-                color: #FFFFFF;
             }
             .chlorineGauge {
                 display: flex;
@@ -961,7 +1143,6 @@ class EasyCareCard extends LitElement {
                 border-radius: 0px 0px 12px 0px;
             }
             .chlorineIcon {
-                color: #FFFFFF;
                 position: absolute;
                 display: flex;
                 top: 2px;
@@ -973,7 +1154,6 @@ class EasyCareCard extends LitElement {
                 justify-content: center;
             }
             .chlorineValue {
-                color: #FFFFFF;
                 position: absolute;
                 justify-content: center;
                 display: flex;
@@ -989,7 +1169,6 @@ class EasyCareCard extends LitElement {
                 text-align: center;
                 margin-top: 5px;
                 font-size: 12px;
-                color: #FFFFFF;
             }
         </style>
         `;

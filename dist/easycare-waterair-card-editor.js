@@ -22,6 +22,7 @@ const entitiesCard = await cardHelpers.createCardElement({ type: "entities", ent
 // Then we make it load its editor through the static getConfigElement method
 entitiesCard.constructor.getConfigElement();
 
+// v1.1.0
 class EasyCareCardEditor extends LitElement {
 
     constructor() {
@@ -41,6 +42,18 @@ class EasyCareCardEditor extends LitElement {
       return this._config.poolConnectionEntity || "";
     }
 
+    get _transparent() {
+      return this._config.transparent || false;
+    }
+
+    get _background() {
+      return this._config.background != undefined ? this._config.background : true;
+    }
+
+    get _small() {
+      return this._config.small || false;
+    }
+
     render() {
         if (!this.hass) {
           return html``;
@@ -56,6 +69,30 @@ class EasyCareCardEditor extends LitElement {
                       .configValue=${"poolConnectionEntity"}
                       @value-changed="${this._valueChanged}"
                       ></ha-entity-picker>
+                </div>
+                <div>
+                  <span>Small card display</span>
+                  <ha-switch
+                      .checked=${this._small}
+                      .configValue="${"small"}"
+                      @change="${this._valueChanged}"
+                      ></ha-switch>
+                </div>
+                <div>
+                  <span>Use transparent display</span>
+                  <ha-switch
+                      .checked=${this._transparent}
+                      .configValue="${"transparent"}"
+                      @change="${this._valueChanged}"
+                      ></ha-switch>
+                </div>
+                <div>
+                  <span>Display background image</span>
+                  <ha-switch
+                      .checked=${this._background}
+                      .configValue="${"background"}"
+                      @change="${this._valueChanged}"
+                      ></ha-switch>
                 </div>
           </div>
           `;
@@ -105,6 +142,10 @@ class EasyCareCardEditor extends LitElement {
               display: block;
               margin-bottom: 16px;
             }
+            ha-switch {
+              margin-top: 10px;
+              margin-bottom: 10px;
+            }
             .switch {
               display: flex;
               margin-bottom: 16px;
@@ -117,10 +158,3 @@ class EasyCareCardEditor extends LitElement {
 
 
 customElements.define("easycare-card-editor", EasyCareCardEditor);
-window.customCards = window.customCards || [];
-window.customCards.push({
-    type: "easy-care-card",
-    name: "EasyCare for Waterair Card",
-    preview: false, // Optional - defaults to false
-    description: "Card to display Pool with EasyCare by Waterair", // Optional
-});
