@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.1.0 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.1.1 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -70,13 +70,12 @@ class EasyCareCard extends LitElement {
         `;
     }
 
-    firstUpdated(changedProperties) {
-        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
-        if (!easyCareConnectionObj || easyCareConnectionObj.state === "unavailable" || easyCareConnectionObj.state === "off")
-            return;
-        this.createPhGauge(this.shadowRoot.getElementById("phGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
-        this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
-        this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+    updated() {
+        if (this.shadowRoot.getElementById("phGauge")) {
+            this.createPhGauge(this.shadowRoot.getElementById("phGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+            this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+            this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+        }
     }
 
     setConfig(config) {
@@ -127,7 +126,7 @@ class EasyCareCard extends LitElement {
         const poolTreatment = this.hass.states["sensor.easy_care_pool_treatment"];
         return html`
             <div class="poolCardTitleContainer">
-                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ? "title-alert":""}">
+                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None') || (easyCareConnectionObj && easyCareConnectionObj.state == 'off')  ? "title-alert":""}">
                     <div class="zoneMessage">
                         Impossible de se connecter au serveur EasyCare
                     </div>
@@ -243,9 +242,7 @@ class EasyCareCard extends LitElement {
 
     getBodyContentSmall() {
         const spotLight = this.hass.states["light.easy_care_pool_spot"];
-        const spotLightDuration = this.hass.states["number.easy_care_pool_spot_light_duration_in_hours"];
         const escaLight = this.hass.states["light.easy_care_pool_escalight"];
-        const escaLightDuration = this.hass.states["number.easy_care_pool_escalight_light_duration_in_hours"];
         return html`
             <div class="poolCardBodyContainer-small ${this.config.transparent && this.config.transparent == true ? "transparent transparent-font" : ""}">
                 <div class="poolBodyLightContainer-small ${(this.config.transparent && this.config.transparent == true) ? "transparent-font" : ""}">
@@ -287,7 +284,7 @@ class EasyCareCard extends LitElement {
                     <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""}" style="align-items: center;${this.config.small!=undefined && this.config.small ? "" : "min-height: 350px !important;"}">
                         <div class="poolBodyMiddle" style="flex-direction: row;">
                             <div class="poolTreatmentMessage" style="${this.config.small!=undefined && this.config.small ? "padding: 10px;width: 250px;" : "padding: 25px;width: 250px;"}">
-                                <div style="text-align: center;"><b style="font-size: 20px;">Le serveur EasyCare est indisponible.</b> <br/><br/> Les données seront mises à jour dès que possible.</div>
+                                <div style="text-align: center;"><b style="font-size: 18px;">Le serveur EasyCare est indisponible.</b> <br/><br/> Les données seront mises à jour dès que possible.</div>
                             </div>
                         </div>
                     </div>`:
