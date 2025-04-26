@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.1.1 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.1.2 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -70,11 +70,23 @@ class EasyCareCard extends LitElement {
         `;
     }
 
-    updated() {
+    updated(changedProperties) {
         if (this.shadowRoot.getElementById("phGauge")) {
-            this.createPhGauge(this.shadowRoot.getElementById("phGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
-            this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
-            this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+            let mustRefresh = false
+            changedProperties.forEach((oldValue, propName) => {
+                if (propName == "hass")
+                    if (oldValue==undefined)
+                        mustRefresh = true
+                    else {
+                        if (oldValue.states[this.config.poolConnectionEntity].state == "off")
+                            mustRefresh = true
+                    }
+            });
+            if (mustRefresh) {
+                this.createPhGauge(this.shadowRoot.getElementById("phGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+                this.createTemperatureGauge(this.shadowRoot.getElementById("temperatureGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+                this.createChlorineGauge(this.shadowRoot.getElementById("chlorineGauge"), this.config.transparent && this.config.transparent == true ? "#000000" : "#FFFFFF");
+            }
         }
     }
 
