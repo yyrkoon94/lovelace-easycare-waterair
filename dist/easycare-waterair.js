@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.1.2 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EsayCare for Waterair  %c 1.1.3 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -75,10 +75,10 @@ class EasyCareCard extends LitElement {
             let mustRefresh = false
             changedProperties.forEach((oldValue, propName) => {
                 if (propName == "hass")
-                    if (oldValue==undefined)
+                    if (oldValue == undefined)
                         mustRefresh = true
                     else {
-                        if (oldValue.states[this.config.poolConnectionEntity].state == "off")
+                        if (oldValue.states[this.config.poolConnectionEntity].state === "unavailable" || oldValue.states[this.config.poolConnectionEntity].state == "off")
                             mustRefresh = true
                     }
             });
