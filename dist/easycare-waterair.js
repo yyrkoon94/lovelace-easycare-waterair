@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EsayCare for Waterair  %c 1.1.3 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EasyCare for Waterair  %c 1.2.0 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -112,22 +112,26 @@ class EasyCareCard extends LitElement {
             <div class="poolCardTitleContainer">
                 <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ? "title-alert":""}">
                     <div class="zoneNom">
-                        ${poolDetailObj.state}
+                        ${poolDetailObj.state} - ${poolDetailObj.attributes.pool_volume}m3
                     </div>
                     <div class="zoneMessage">
                     ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ?
                         "Votre piscine a besoin de vous": "Tout va bien !"}
                     </div>
-                    <div class="zoneVolume">
-                        ${poolDetailObj.attributes.pool_volume}m3
+                    <div class="zoneUpdate">
+                        Màj à ${this._formatHour(new Date(easyCareConnectionObj.attributes["last_update"]))}
                     </div>
                 </div>
                 ${easyCareConnectionObj ?
                     html`<div class="poolCardTitleIndicators${this.config.small!=undefined && this.config.small ? "-small": ""} ${this.config.transparent && this.config.transparent == true && (!this.config.small) ? "transparent" : ""}">
-                        <div class="poolCardTitleConnected${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""}${this.config.small!=undefined && this.config.small? "-small": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" >
-                            <ha-icon icon="${easyCareConnectionObj.state === "on" ? "mdi:network-outline" : "mdi:network-off-outline"}" style="height: 25px;margin-left: 5px;">
+                            <div class="poolCardTitleConnected${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""}${this.config.small!=undefined && this.config.small? "-small": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" >
+                                <ha-icon icon="${easyCareConnectionObj.state === "on" ? "mdi:network-outline" : "mdi:network-off-outline"}" style="height: 25px;margin-left: 5px;">
+                            </div>
+                            <div class="poolCardTitleRefresh${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""}${this.config.small!=undefined && this.config.small? "-small": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" @click="${() => {this._manageRefresh()}}">
+                                <ha-icon icon="mdi:refresh" style="height: 25px;margin-right: 5px;cursor:pointer">
+                            </div>
                         </div>
-                    </div>`: "" }
+                        `: "" }
             </div>
         `;
     }
@@ -138,14 +142,14 @@ class EasyCareCard extends LitElement {
         const poolTreatment = this.hass.states["sensor.easy_care_pool_treatment"];
         return html`
             <div class="poolCardTitleContainer">
-                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None') || (easyCareConnectionObj && easyCareConnectionObj.state == 'off')  ? "title-alert":""}">
+                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} title-alert">
                     <div class="zoneMessage">
                         Impossible de se connecter au serveur EasyCare
                     </div>
                 </div>
                 ${easyCareConnectionObj ?
                     html`<div class="poolCardTitleIndicators ${this.config.transparent && this.config.transparent == true  ? "transparent" : ""}">
-                        <div class="poolCardTitleConnected${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" >
+                        <div class="poolCardTitleConnected${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font title-alert" : "title-alert"}" >
                             <ha-icon icon="${easyCareConnectionObj.state === "on" ? "mdi:network-outline" : "mdi:network-off-outline"}" style="height: 25px;margin-left: 5px;">
                         </div>
                     </div>`: "" }
@@ -183,7 +187,7 @@ class EasyCareCard extends LitElement {
                             </div>
                             <div class="timeRemainning ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
                                 <div class="timeStatus ${this.config.transparent && this.config.transparent == true && spotLight.state == "on" ? "text-shadow" : ""}">
-                                    <span style="${spotLight.state == "on" ? "color:yellow;font-weight: bold;": ""}">${spotLight.state  == "on" ? "Allumé" : "Eteint"}</span>
+                                    <span style="${spotLight.state == "on" ? "color:yellow;font-weight: bold;": "padding-top:8px;"}">${spotLight.state  == "on" ? "Allumé" : "Eteint"}</span>
                                 </div>
                                 <div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}">
                                     ${spotLight.state == "on" ? spotLight.attributes["remaining_time"] : ""}
@@ -240,7 +244,7 @@ class EasyCareCard extends LitElement {
                                 </div>
                                 <div class="timeRemainning ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}">
                                     <div class="timeStatus ${this.config.transparent && this.config.transparent == true && escaLight.state == "on" ? "text-shadow" : ""}">
-                                        <span style="${escaLight.state == "on" ? "color:yellow;font-weight: bold;": ""}">${escaLight.state == "on" ? "Allumé" : "Eteint"}</span>
+                                        <span style="${escaLight.state == "on" ? "color:yellow;font-weight: bold;": "padding-top:8px;"}">${escaLight.state == "on" ? "Allumé" : "Eteint"}</span>
                                     </div>
                                     <div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}"">
                                         ${escaLight.state == "on" ? escaLight.attributes["remaining_time"]  : ""}
@@ -296,7 +300,7 @@ class EasyCareCard extends LitElement {
                     <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""}" style="align-items: center;${this.config.small!=undefined && this.config.small ? "" : "min-height: 350px !important;"}">
                         <div class="poolBodyMiddle" style="flex-direction: row;">
                             <div class="poolTreatmentMessage" style="${this.config.small!=undefined && this.config.small ? "padding: 10px;width: 250px;" : "padding: 25px;width: 250px;"}">
-                                <div style="text-align: center;"><b style="font-size: 18px;">Le serveur EasyCare est indisponible.</b> <br/><br/> Les données seront mises à jour dès que possible.</div>
+                                <div style="text-align: center;"><b style="font-size: 18px;">Le serveur EasyCare est indisponible.</b> <br/><br/> Les données seront mises à jour dès que possible.<br/><br/>>> <a style="cursor: pointer;text-decoration: underline;" @click="${() => {this._manageRefresh()}}">Réessayer</a> <<<</div>
                             </div>
                         </div>
                     </div>`:
@@ -323,6 +327,10 @@ class EasyCareCard extends LitElement {
             this.hass.callService('light', 'turn_on', { entity_id: entity.entity_id })
     }
 
+    _manageRefresh() {
+        this.hass.callService('button', 'press', { entity_id: "button.easy_care_pool_refresh_data"})
+    }
+
     _formatDate(date) {
         var hours = date.getHours();
         var minutes = date.getMinutes();
@@ -330,6 +338,15 @@ class EasyCareCard extends LitElement {
         minutes = minutes < 10 ? '0'+minutes : minutes;
         var strTime = hours + ':' + minutes;
         return date.getDate() + " " + date.toLocaleDateString("fr-fr", {month: 'short'}) + " " + date.getFullYear() + " à " + strTime;
+    }
+
+    _formatHour(date) {
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        hours = hours < 10 ? '0'+hours : hours;
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        var strTime = hours + ':' + minutes;
+        return strTime;
     }
 
     getBottomBar() {
@@ -778,6 +795,43 @@ class EasyCareCard extends LitElement {
                 padding-left: 5px;
                 z-index: 1;
             }
+            .poolCardTitleRefresh {
+                display: flex;
+                justify-content: flex-end;
+                height: 40px;
+                width: 40px;
+                background: rgba(0, 0, 0, 0.7);
+                border-radius: 0px 0px 0px 40px;
+            }
+            .poolCardTitleRefresh-transparent {
+                display: flex;
+                justify-content: flex-end;
+                height: 35px;
+                width: 40px;
+                border-radius: 0px 0px 0px 40px;
+                border-left: 1px solid;
+                border-bottom: 1px solid;
+                z-index: 1;
+            }
+            .poolCardTitleRefresh-transparent-small {
+                display: flex;
+                justify-content: center;
+                margin-left: 10px;
+                height: 35px;
+                width: 40px;
+                border-radius: 0px 0px 40px 40px;
+                border-right: 1px solid;
+                border-bottom: 1px solid;
+                border-left: 1px solid;
+                padding-left: 5px;
+                z-index: 1;
+            }
+            .lastUpdate {
+               font-size: 10px;
+                position: absolute;
+                top: 0;
+                right: 10px;
+            }
             .zoneNom {
                 display: flex;
                 align-self: center;
@@ -785,6 +839,7 @@ class EasyCareCard extends LitElement {
                 font-size: 12px;
                 font-weight: 400;
                 text-wrap-mode: nowrap;
+                min-width: 120px;
             }
             .zoneMessage {
                 display: flex;
@@ -794,13 +849,15 @@ class EasyCareCard extends LitElement {
                 font-weight: 400;
                 width: 100%;
             }
-            .zoneVolume {
+            .zoneUpdate {
                 display: flex;
                 align-self: center;
                 justify-content:right;
                 padding-right: 12px;
                 font-size: 12px;
                 font-weight: 400;
+                text-wrap-mode: nowrap;
+                min-width: 120px;
             }
             .poolCardBodyContainer {
                 display:flex;
@@ -873,7 +930,7 @@ class EasyCareCard extends LitElement {
                 display: flex;
                 align-self: center;
                 font-size: 18px;
-                margin-top: 10px;
+                margin-top: 5px;
                 flex-direction: column;
                 border-bottom: 1px solid;
                 width: 95%;
@@ -888,7 +945,7 @@ class EasyCareCard extends LitElement {
             .lightText {
                 display: flex;
                 align-self: center;
-                padding-bottom: 5px;
+                padding-bottom: 2px;
             }
             .lightImage {
                 display: flex;
@@ -900,7 +957,7 @@ class EasyCareCard extends LitElement {
                 display: flex;
                 align-self: center;
                 font-size: 18px;
-                margin-top: 10px;
+                margin-top: 5px;
                 flex-direction: column;
                 border-bottom: 1px solid;
                 width: 95%;
@@ -908,19 +965,18 @@ class EasyCareCard extends LitElement {
             .selectTimer {
                 display: flex;
                 align-self: center;
-                padding-bottom: 5px;
                 width:100%;
             }
             .lightButton {
                 display: flex;
                 align-self: center;
-                margin-bottom: 10px;
+                margin-bottom: 5px;
                 cursor: pointer;
             }
             .timeRemainning {
                 display: flex;
                 align-self: center;
-                margin-top: 10px;
+                margin-top: 5px;
                 flex-direction: column;
             }
             .timeStatus {
