@@ -54,6 +54,10 @@ class EasyCareCardEditor extends LitElement {
       return this._config.small || false;
     }
 
+    get _showRefresh() {
+      return this._config.showRefresh != undefined ? this._config.showRefresh : true;
+    }
+
     render() {
         if (!this.hass) {
           return html``;
@@ -91,6 +95,14 @@ class EasyCareCardEditor extends LitElement {
                   <ha-switch
                       .checked=${this._background}
                       .configValue="${"background"}"
+                      @change="${this._valueChanged}"
+                      ></ha-switch>
+                </div>
+                <div>
+                  <span>Show refresh button</span>
+                  <ha-switch
+                      .checked=${this._showRefresh}
+                      .configValue="${"showRefresh"}"
                       @change="${this._valueChanged}"
                       ></ha-switch>
                 </div>

@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EasyCare for Waterair  %c 1.2.0 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EasyCare for Waterair  %c 1.2.1 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -127,9 +127,11 @@ class EasyCareCard extends LitElement {
                             <div class="poolCardTitleConnected${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""}${this.config.small!=undefined && this.config.small? "-small": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" >
                                 <ha-icon icon="${easyCareConnectionObj.state === "on" ? "mdi:network-outline" : "mdi:network-off-outline"}" style="height: 25px;margin-left: 5px;">
                             </div>
-                            <div class="poolCardTitleRefresh${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""}${this.config.small!=undefined && this.config.small? "-small": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" @click="${() => {this._manageRefresh()}}">
-                                <ha-icon icon="mdi:refresh" style="height: 25px;margin-right: 5px;cursor:pointer">
-                            </div>
+                            ${(this.config.showRefresh==undefined || this.config.showRefresh == true) ?
+                                html`
+                                    <div class="poolCardTitleRefresh${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""}${this.config.small!=undefined && this.config.small? "-small": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" @click="${() => {this._manageRefresh()}}">
+                                        <ha-icon icon="mdi:refresh" style="height: 25px;margin-right: 5px;cursor:pointer">
+                                    </div>`:""}
                         </div>
                         `: "" }
             </div>
