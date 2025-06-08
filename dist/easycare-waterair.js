@@ -299,10 +299,14 @@ class EasyCareCard extends LitElement {
         return html`
             ${(easyCareConnectionObj && easyCareConnectionObj.attributes["token_valid"] && easyCareConnectionObj.attributes["token_valid"] == true) || !easyCareConnectionObj || easyCareConnectionObj.state === "unavailable" ?
                 html`
-                    <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""}" style="align-items: center;${this.config.small!=undefined && this.config.small ? "" : "min-height: 350px !important;"}">
+                    <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true ? "transparent transparent-font" : ""}" style="align-items: center;${this.config.small != undefined && this.config.small ? "" : "min-height: 350px !important;"}">
                         <div class="poolBodyMiddle" style="flex-direction: row;">
-                            <div class="poolTreatmentMessage" style="${this.config.small!=undefined && this.config.small ? "padding: 10px;width: 250px;" : "padding: 25px;width: 250px;"}">
-                                <div style="text-align: center;"><b style="font-size: 18px;">Le serveur EasyCare est indisponible.</b> <br/><br/> Les données seront mises à jour dès que possible.<br/><br/>>> <a style="cursor: pointer;text-decoration: underline;" @click="${() => {this._manageRefresh()}}">Réessayer</a> <<<</div>
+                            <div class="poolTreatmentMessage" style="${this.config.small != undefined && this.config.small ? "padding: 10px;width: 250px;" : "padding: 25px;width: 250px;"}">
+                                <div style="text-align: center;"><b style="font-size: 18px;">Le serveur EasyCare est indisponible.</b> <br/>Les données seront mises à jour dès que possible.<br/>
+                                    ${(this.config.showRefresh == undefined || this.config.showRefresh == true) ?
+                                        html`
+                                        >> <a style="cursor: pointer;text-decoration: underline;" @click="${() => { this._manageRefresh() }}" > Réessayer</a > <<<` : html`<br/>`}
+                                </div>
                             </div>
                         </div>
                     </div>`:
