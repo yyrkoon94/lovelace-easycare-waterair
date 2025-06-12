@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EasyCare for Waterair  %c 1.2.2 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EasyCare for Waterair  %c 1.2.3 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -112,7 +112,7 @@ class EasyCareCard extends LitElement {
             <div class="poolCardTitleContainer">
                 <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ? "title-alert":""}">
                     <div class="zoneNom">
-                        ${poolDetailObj.state} - ${poolDetailObj.attributes.pool_volume}m3
+                        ${poolDetailObj.attributes.pool_volume}m3
                     </div>
                     <div class="zoneMessage">
                     ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ?
@@ -845,7 +845,7 @@ class EasyCareCard extends LitElement {
                 font-size: 12px;
                 font-weight: 400;
                 text-wrap-mode: nowrap;
-                min-width: 120px;
+                min-width: 60px;
             }
             .zoneMessage {
                 display: flex;
@@ -863,7 +863,7 @@ class EasyCareCard extends LitElement {
                 font-size: 12px;
                 font-weight: 400;
                 text-wrap-mode: nowrap;
-                min-width: 120px;
+                min-width: 60px;
             }
             .poolCardBodyContainer {
                 display:flex;
