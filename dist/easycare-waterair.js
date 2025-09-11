@@ -272,7 +272,9 @@ class EasyCareCard extends LitElement {
                                     <ha-icon icon="mdi:lightbulb-on">
                                 </div>
                             </div>
-                        </div>`: ""}
+                        </div>`:
+                        html`<div style="height:36px">
+                            </div>`}
                      <div class="poolBodyMiddle" style="flex: 3;">
                         <div class="emptyBodyMiddleDiv">
                         </div>
@@ -288,7 +290,9 @@ class EasyCareCard extends LitElement {
                                         <ha-icon icon="mdi:light-recessed"></ha-icon>
                                     </div>
                                 </div>
-                            </div>`: ""}
+                            </div>`:
+                        html`<div style="height:36px">
+                            </div>`}
                 </div>
             </div>
         `;
@@ -367,7 +371,7 @@ class EasyCareCard extends LitElement {
                 <div class="emptyDiv${this.config.small!=undefined && this.config.small ? "-small" : ""} ${this.config.transparent && this.config.transparent == true ? "transparent" : ""}">
                     ${this.config.small!=undefined && this.config.small ?
                         html`<div class="timeRemainning ${this.config.transparent && this.config.transparent == true ? " transparent-font" : ""}" style="width:100%;margin-top: 0px;">
-                            ${spotLight.state == "on" ? html`<div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}" style="color: #21718c !important;">${spotLight.attributes["remaining_time"]}</div>` : html`<div class="eteint">Eteint</div>`}
+                            ${spotLight && spotLight.state == "on" ? html`<div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}" style="color: #21718c !important;">${spotLight.attributes["remaining_time"]}</div>` : spotLight ? html`<div class="eteint">Eteint</div>` : html`<div class="eteint"></div>`}
                             </div>`: ""}
                 </div>
                 ${poolPhObj ?
@@ -415,7 +419,7 @@ class EasyCareCard extends LitElement {
                 <div class="emptyDiv${this.config.small!=undefined && this.config.small ? "-small" : ""} ${this.config.transparent && this.config.transparent == true ? "transparent" : ""}">
                     ${this.config.small!=undefined && this.config.small ?
                         html`<div class="timeRemainning ${this.config.transparent && this.config.transparent == true ? " transparent-font" : ""}" style="width:100%;margin-top: 0px;">
-                            ${escaLight.state == "on" ? html`<div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}" style="color: #21718c !important;">${escaLight.attributes["remaining_time"]}</div>` : html`<div class="eteint">Eteint</div>`}
+                            ${escaLight && escaLight.state == "on" ? html`<div class="remaining ${this.config.transparent && this.config.transparent == true? "text-shadow" : ""}" style="color: #21718c !important;">${escaLight.attributes["remaining_time"]}</div>` : escaLight ? html`<div class="eteint">Eteint</div>` : html`<div class="eteint"></div>`}
                             </div>`: ""}
                 </div>
                 ${poolChlorineObj ?
