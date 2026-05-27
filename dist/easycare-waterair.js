@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EasyCare for Waterair  %c 1.2.4 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EasyCare for Waterair  %c 2.0.0 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -43,7 +43,11 @@ class EasyCareCard extends LitElement {
         if (!this.config || !this.hass) {
             return html``;
         }
-        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
+        let watbox_id = ""
+        if (this.hass.states[this.config.poolWATBOXEntity]) {
+            watbox_id = this.hass.states[this.config.poolWATBOXEntity].entity_id.substring(this.hass.states[this.config.poolWATBOXEntity].entity_id.indexOf("watbox"))
+        }
+        const easyCareConnectionObj = this.hass.states["binary_sensor."+watbox_id+"_connexion"];
         if (!easyCareConnectionObj || easyCareConnectionObj.state === "unavailable" || easyCareConnectionObj.state === "off")
             return html`
                 ${this.getStyles()}
@@ -71,6 +75,8 @@ class EasyCareCard extends LitElement {
     }
 
     updated(changedProperties) {
+        const watbox_id = this.hass.states[this.config.poolWATBOXEntity].entity_id.substring(this.hass.states[this.config.poolWATBOXEntity].entity_id.indexOf("watbox"))
+        const easyCareConnectionObj = this.hass.states["binary_sensor." + watbox_id + "_connexion"];
         if (this.shadowRoot.getElementById("phGauge")) {
             let mustRefresh = false
             changedProperties.forEach((oldValue, propName) => {
@@ -78,7 +84,7 @@ class EasyCareCard extends LitElement {
                     if (oldValue == undefined)
                         mustRefresh = true
                     else {
-                        if (oldValue.states[this.config.poolConnectionEntity].state === "unavailable" || oldValue.states[this.config.poolConnectionEntity].state == "off")
+                        if (oldValue.states[easyCareConnectionObj.entity_id].state === "unavailable" || oldValue.states[easyCareConnectionObj.entity_id].state == "off")
                             mustRefresh = true
                     }
             });
@@ -91,8 +97,8 @@ class EasyCareCard extends LitElement {
     }
 
     setConfig(config) {
-        if (!config.poolConnectionEntity) {
-            throw new Error("You need to define a poolConnectionEntity");
+        if (!config.poolWATBOXEntity) {
+            throw new Error("You need to define a pool WATBOX Entity");
         }
         this.config = config;
     }
@@ -103,23 +109,26 @@ class EasyCareCard extends LitElement {
         return this.config.entities.length + 1;
     }
 
+    // TODO : Revoir la date de maj
     getTitleBar() {
-        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
-        const poolDetailObj = this.hass.states["sensor.easycare_pool_detail"];
-        const poolNotification = this.hass.states["sensor.easy_care_pool_notification"];
-        const poolTreatment = this.hass.states["sensor.easy_care_pool_treatment"];
+        const watbox_id = this.hass.states[this.config.poolWATBOXEntity].entity_id.substring(this.hass.states[this.config.poolWATBOXEntity].entity_id.indexOf("watbox"))
+        const ac1_id = this.hass.states[this.config.poolAC1Entity].entity_id.substring(this.hass.states[this.config.poolAC1Entity].entity_id.indexOf("ac1"))
+        const easyCareConnectionObj = this.hass.states["binary_sensor." + watbox_id + "_connexion"];
+        const poolDetailObj = this.hass.states["sensor." + watbox_id + "_modele_de_piscine"];
+        const poolNotification = this.hass.states["sensor." + ac1_id + "_derniere_notification"];
+        const poolTreatment = this.hass.states["sensor." + ac1_id + "_traitement_actif"];
         return html`
             <div class="poolCardTitleContainer">
-                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ? "title-alert":""}">
+                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && (poolNotification.state != 'None' && poolNotification.state != 'shouldBeWintered' || poolNotification.state == 'shouldBeWintered' && !this.config.activeWintering))|| (poolTreatment && poolTreatment.state != 'None')  ? "title-alert":""}">
                     <div class="zoneNom">
-                        ${poolDetailObj.attributes.pool_volume}m3
+                        ${poolDetailObj.attributes.volume_m3}m3
                     </div>
                     <div class="zoneMessage">
-                    ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None')  ?
+                    ${(poolNotification && ((poolNotification.state != 'None' && poolNotification.state != 'shouldBeWintered') || (poolNotification.state == 'shouldBeWintered' && !this.config.activeWintering))) || (poolTreatment && poolTreatment.state != 'None')  ?
                         "Votre piscine a besoin de vous": "Tout va bien !"}
                     </div>
                     <div class="zoneUpdate">
-                        Màj à ${this._formatHour(new Date(easyCareConnectionObj.attributes["last_update"]))}
+                        Màj à ${this._formatHour(new Date(poolDetailObj.attributes.last_update))}
                     </div>
                 </div>
                 ${easyCareConnectionObj ?
@@ -129,7 +138,7 @@ class EasyCareCard extends LitElement {
                             </div>
                             ${(this.config.showRefresh==undefined || this.config.showRefresh == true) ?
                                 html`
-                                    <div class="poolCardTitleRefresh${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""}${this.config.small!=undefined && this.config.small? "-small": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" @click="${() => {this._manageRefresh()}}">
+                                    <div class="poolCardTitleRefresh${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small)? "-transparent": ""}${this.config.small!=undefined && this.config.small? "-small": ""} ${this.config.transparent && this.config.transparent == true ? "transparent-font" : ""}" @click="${() => {this._manageRefresh(watbox_id)}}">
                                         <ha-icon icon="mdi:refresh" style="height: 25px;margin-right: 5px;cursor:pointer">
                                     </div>`:""}
                         </div>
@@ -139,9 +148,11 @@ class EasyCareCard extends LitElement {
     }
 
     getTitleBarError() {
-        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
-        const poolNotification = this.hass.states["sensor.easy_care_pool_notification"];
-        const poolTreatment = this.hass.states["sensor.easy_care_pool_treatment"];
+        let watbox_id = "";
+        if (this.hass.states[this.config.poolWATBOXEntity]) {
+            watbox_id = this.hass.states[this.config.poolWATBOXEntity].entity_id.substring(this.hass.states[this.config.poolWATBOXEntity].entity_id.indexOf("watbox"))
+        }
+        const easyCareConnectionObj = this.hass.states["binary_sensor." + watbox_id + "_connexion"];
         return html`
             <div class="poolCardTitleContainer">
                 <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} title-alert">
@@ -160,12 +171,16 @@ class EasyCareCard extends LitElement {
     }
 
     getBodyContent() {
-        const poolNotification = this.hass.states["sensor.easy_care_pool_notification"];
-        const poolTreatment = this.hass.states["sensor.easy_care_pool_treatment"];
-        const spotLight = this.hass.states["light.easy_care_pool_spot"];
-        const spotLightDuration = this.hass.states["number.easy_care_pool_spot_light_duration_in_hours"];
-        const escaLight = this.hass.states["light.easy_care_pool_escalight"];
-        const escaLightDuration = this.hass.states["number.easy_care_pool_escalight_light_duration_in_hours"];
+        const ac1_id = this.hass.states[this.config.poolAC1Entity].entity_id.substring(this.hass.states[this.config.poolAC1Entity].entity_id.indexOf("ac1"))
+        const bpc_id = this.hass.states[this.config.poolBPCEntity].entity_id.substring(this.hass.states[this.config.poolBPCEntity].entity_id.indexOf("bpc"))
+
+
+        const poolNotification = this.hass.states["sensor." + ac1_id + "_derniere_notification"];
+        const poolTreatment = this.hass.states["sensor." + ac1_id + "_traitement_actif"];
+        const spotLight = this.hass.states["light."+bpc_id+"_projecteur"];
+        const spotLightDuration = this.hass.states["number."+bpc_id+"_duree_projecteur"];
+        const escaLight = this.hass.states["light."+bpc_id+"_eclairage_des_marches"];
+        const escaLightDuration = this.hass.states["number."+bpc_id+"_duree_eclairage_marches"];
         return html`
             <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true ? "transparent transparent-font" : ""}">
                 <div class="poolBodyTop">
@@ -200,7 +215,7 @@ class EasyCareCard extends LitElement {
                         <div class="emptyBodyMiddleDiv">
                         </div>
                         ${poolNotification && poolNotification.attributes["all_notifications"] && poolNotification.attributes["all_notifications"] != 'None' ? Object.keys(poolNotification.attributes["all_notifications"]).map(notification => {
-                            return html`<div class="${poolNotification.attributes["all_notifications"][notification].notification == "gatewayConnectivityLost" || poolNotification.attributes["all_notifications"][notification].notification == "batteryLow" || poolNotification.attributes["all_notifications"][notification].notification == "batteryTooLowToMeasure" ? "poolTreatmentMessageGateway" : "poolTreatmentMessage"}">
+                            return (poolNotification.attributes["all_notifications"][notification].notification == "shouldBeWintered" && !this.config.activeWintering || poolNotification.attributes["all_notifications"][notification].notification != "shouldBeWintered") ? html`<div class="${poolNotification.attributes["all_notifications"][notification].notification == "gatewayConnectivityLost" || poolNotification.attributes["all_notifications"][notification].notification == "batteryLow" || poolNotification.attributes["all_notifications"][notification].notification == "batteryTooLowToMeasure" ? "poolTreatmentMessageGateway" : "poolTreatmentMessage"}">
                                     <div style="text-align: center;">
                                         ${poolNotification.attributes["all_notifications"][notification].notification == "shouldDoChlorineTreatment" ? "Votre Traitement Easy Pool"
                                             : poolNotification.attributes["all_notifications"][notification].notification == "shouldBeCalibrated" ? "Votre AC1 devrait être calibré"
@@ -209,19 +224,19 @@ class EasyCareCard extends LitElement {
                                             : poolNotification.attributes["all_notifications"][notification].notification == "batteryTooLowToMeasure" ? "Les piles de votre AC1 sont trop faibles, les mesures sont suspendues" : "WATBOX déconnectée"}
                                     </div>
                                     <div class="poolTreatmentNotificationDate">
-                                        ${this._formatDate(new Date(poolNotification.attributes["all_notifications"][notification]["last_update"]))}
+                                        ${this._formatDate(new Date(poolNotification.attributes["all_notifications"][notification]["date"]))}
                                     </div>
-                                </div>`
+                                </div>` : html``
                         }):""}
                         ${poolTreatment && poolTreatment.state != 'None' ?
                             html`<div class="poolTreatmentMessage">
                                     <div style="text-align: center;">Une action corrective est disponible</div>
                                     <div class="poolTreatmentNotificationDate">
-                                        ${this._formatDate(new Date(poolTreatment.attributes["last_update"]))}
+                                        ${this._formatDate(new Date(poolTreatment.attributes["date"]))}
                                     </div>
                                 </div>`
                             : ""}
-                        ${(poolNotification && poolNotification.state != 'None') || (poolTreatment && poolTreatment.state != 'None') ?
+                        ${(poolNotification.state != 'None' && poolNotification.state != 'shouldBeWintered' || poolNotification.state == 'shouldBeWintered' && !this.config.activeWintering) || (poolTreatment && poolTreatment.state != 'None') ?
                             html`<div class="actionsTodo">Actions À Mener</div>` : ""
                         }
                     </div>
@@ -259,8 +274,10 @@ class EasyCareCard extends LitElement {
     }
 
     getBodyContentSmall() {
-        const spotLight = this.hass.states["light.easy_care_pool_spot"];
-        const escaLight = this.hass.states["light.easy_care_pool_escalight"];
+        const bpc_id = this.hass.states[this.config.poolBPCEntity].entity_id.substring(this.hass.states[this.config.poolBPCEntity].entity_id.indexOf("bpc"))
+
+        const spotLight = this.hass.states["light."+bpc_id+"_projecteur"];
+        const escaLight = this.hass.states["light."+bpc_id+"_eclairage_des_marches"];
         return html`
             <div class="poolCardBodyContainer-small ${this.config.transparent && this.config.transparent == true ? "transparent transparent-font" : ""}">
                 <div class="poolBodyLightContainer-small ${(this.config.transparent && this.config.transparent == true) ? "transparent-font" : ""}">
@@ -299,31 +316,19 @@ class EasyCareCard extends LitElement {
     }
 
     getErrorContent() {
-        const easyCareConnectionObj = this.hass.states[this.config.poolConnectionEntity];
+        const watbox_id = this.hass.states[this.config.poolWATBOXEntity].entity_id.substring(this.hass.states[this.config.poolWATBOXEntity].entity_id.indexOf("watbox"))
         return html`
-            ${(easyCareConnectionObj && easyCareConnectionObj.attributes["token_valid"] && easyCareConnectionObj.attributes["token_valid"] == true) || !easyCareConnectionObj || easyCareConnectionObj.state === "unavailable" ?
-                html`
-                    <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true ? "transparent transparent-font" : ""}" style="align-items: center;${this.config.small != undefined && this.config.small ? "" : "min-height: 350px !important;"}">
-                        <div class="poolBodyMiddle" style="flex-direction: row;">
-                            <div class="poolTreatmentMessage" style="${this.config.small != undefined && this.config.small ? "padding: 10px;width: 250px;" : "padding: 25px;width: 250px;"}">
-                                <div style="text-align: center;"><b style="font-size: 18px;">Le serveur EasyCare est indisponible.</b> <br/>Les données seront mises à jour dès que possible.<br/>
-                                    ${(this.config.showRefresh == undefined || this.config.showRefresh == true) ?
-                                        html`
-                                        >> <a style="cursor: pointer;text-decoration: underline;" @click="${() => { this._manageRefresh() }}" > Réessayer</a > <<<` : html`<br/>`}
-                                </div>
-                            </div>
+            <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true ? "transparent transparent-font" : ""}" style="align-items: center;${this.config.small != undefined && this.config.small ? "" : "min-height: 350px !important;"}">
+                <div class="poolBodyMiddle" style="flex-direction: row;">
+                    <div class="poolTreatmentMessage" style="${this.config.small != undefined && this.config.small ? "padding: 10px;width: 250px;" : "padding: 25px;width: 250px;"}">
+                        <div style="text-align: center;"><b style="font-size: 18px;">Le serveur EasyCare est indisponible.</b> <br/>Les données seront mises à jour dès que possible.<br/>
+                            ${(this.config.showRefresh == undefined || this.config.showRefresh == true) ?
+                                html`
+                                >> <a style="cursor: pointer;text-decoration: underline;" @click="${() => { this._manageRefresh(watbox_id) }}" > Réessayer</a > <<<` : html`<br/>`}
                         </div>
-                    </div>`:
-                html`
-                    <div class="poolCardBodyContainer ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} " style="align-items: center;${this.config.small!=undefined && this.config.small ? "" : "min-height: 350px !important;"}">
-                        <div class="poolBodyMiddle" style="flex-direction: row;">
-                            <div class="poolTreatmentMessage" style="${this.config.small!=undefined && this.config.small ? "padding: 10px;width: 250px;" : "padding: 25px;width: 250px;"}">
-                                <div style="text-align: center;"><b style="font-size: 20px;">Le token a exipré !</b> <br/><br/> Mettre à jour la valeur dans configuration.yaml puis redémarrer Home Assistant.</div>
-                            </div>
-                        </div>
-                    </div>`
-            }
-        `;
+                    </div>
+                </div>
+            </div>`;
     }
 
     _handleClick(entity) {
@@ -337,8 +342,9 @@ class EasyCareCard extends LitElement {
             this.hass.callService('light', 'turn_on', { entity_id: entity.entity_id })
     }
 
-    _manageRefresh() {
-        this.hass.callService('button', 'press', { entity_id: "button.easy_care_pool_refresh_data"})
+    // OK
+    _manageRefresh(watbox_id) {
+        this.hass.callService('button', 'press', { entity_id: "button."+watbox_id+"_rafraichir_les_donnees"})
     }
 
     _formatDate(date) {
@@ -360,11 +366,14 @@ class EasyCareCard extends LitElement {
     }
 
     getBottomBar() {
-        const poolTemperatureObj = this.hass.states["sensor.easy_care_pool_temperature"];
-        const poolPhObj = this.hass.states["sensor.easy_care_pool_ph"];
-        const poolChlorineObj = this.hass.states["sensor.easy_care_pool_chlorine"];
-        const spotLight = this.hass.states["light.easy_care_pool_spot"];
-        const escaLight = this.hass.states["light.easy_care_pool_escalight"];
+        const ac1_id = this.hass.states[this.config.poolAC1Entity].entity_id.substring(this.hass.states[this.config.poolAC1Entity].entity_id.indexOf("ac1"))
+        const bpc_id = this.hass.states[this.config.poolBPCEntity].entity_id.substring(this.hass.states[this.config.poolBPCEntity].entity_id.indexOf("bpc"))
+
+        const poolTemperatureObj = this.hass.states["sensor." + ac1_id + "_temperature_de_l_eau"];
+        const poolPhObj = this.hass.states["sensor." + ac1_id + "_ph"];
+        const poolChlorineObj = this.hass.states["sensor." + ac1_id + "_chlore_redox"];
+        const spotLight = this.hass.states["light."+bpc_id+"_projecteur"];
+        const escaLight = this.hass.states["light."+bpc_id+"_eclairage_des_marches"];
         return html`
         <div class="poolCardBottom">
             <div class="emptyDivContainer">
@@ -387,7 +396,7 @@ class EasyCareCard extends LitElement {
                                 ${parseFloat(poolPhObj.state).toFixed(1)}
                             </div>
                             <div class="phDate">
-                                ${this._formatDate(new Date(poolPhObj.attributes["last_update"]))}
+                                ${this._formatDate(new Date(poolPhObj.attributes["last_measured"]))}
                             </div>
                         </div>`
                     : html``
@@ -410,7 +419,7 @@ class EasyCareCard extends LitElement {
                             ${parseFloat(poolTemperatureObj.state).toFixed(1)}
                         </div>
                         <div class="temperatureDate">
-                            ${this._formatDate(new Date(poolTemperatureObj.attributes["last_update"]))}
+                            ${this._formatDate(new Date(poolTemperatureObj.attributes["last_measured"]))}
                         </div>
                     </div>`
                 : html``
@@ -432,10 +441,10 @@ class EasyCareCard extends LitElement {
                                 <canvas height="70" width="100"" id="chlorineGauge"></ canvas>
                             </div>
                             <div class="chlorineValue">
-                                ${poolChlorineObj.state}
+                                ${parseInt(poolChlorineObj.state)}
                             </div>
                             <div class="chlorineDate">
-                                ${this._formatDate(new Date(poolChlorineObj.attributes["last_update"]))}
+                                ${this._formatDate(new Date(poolChlorineObj.attributes["last_measured"]))}
                             </div>
                         </div>`
                     : html``
@@ -475,7 +484,9 @@ class EasyCareCard extends LitElement {
 
     createPhGauge(target, color) {
         const colorGauge = color ? color : "#FFFFFF";
-        const poolPhObj = this.hass.states["sensor.easy_care_pool_ph"];
+
+        const ac1_id = this.hass.states[this.config.poolAC1Entity].entity_id.substring(this.hass.states[this.config.poolAC1Entity].entity_id.indexOf("ac1"))
+        const poolPhObj = this.hass.states["sensor." + ac1_id + "_ph"];
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
         // Replade :
@@ -560,7 +571,8 @@ class EasyCareCard extends LitElement {
 
     createTemperatureGauge(target, color) {
         const colorGauge = color ? color : "#FFFFFF";
-        const poolTemperatureObj = this.hass.states["sensor.easy_care_pool_temperature"];
+        const ac1_id = this.hass.states[this.config.poolAC1Entity].entity_id.substring(this.hass.states[this.config.poolAC1Entity].entity_id.indexOf("ac1"))
+        const poolTemperatureObj = this.hass.states["sensor." + ac1_id + "_temperature_de_l_eau"];
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
         // Replade :
@@ -632,7 +644,9 @@ class EasyCareCard extends LitElement {
 
     createChlorineGauge(target, color) {
         const colorGauge = color ? color : "#FFFFFF";
-        const poolChlorineObj = this.hass.states["sensor.easy_care_pool_chlorine"];
+        const ac1_id = this.hass.states[this.config.poolAC1Entity].entity_id.substring(this.hass.states[this.config.poolAC1Entity].entity_id.indexOf("ac1"))
+        const poolChlorineObj = this.hass.states["sensor." + ac1_id + "_chlore_redox"];
+
         // Gauge from http://bernii.github.io/gauge.js/
         // Fix behavior in gaguge.min.js :
         // Replade :
@@ -641,24 +655,24 @@ class EasyCareCard extends LitElement {
         //   i=this.canvas.height,e=this.canvas.width
         var opts = {
             staticZones: [
-                {strokeStyle: '#fc8500', min: 450, max: 455},
-                {strokeStyle: '#f98b00', min: 455, max: 460},
-                {strokeStyle: '#f69200', min: 460, max: 465},
-                {strokeStyle: '#f29900', min: 465, max: 470},
-                {strokeStyle: '#eba200', min: 470, max: 475},
-                {strokeStyle: '#e7a800', min: 475, max: 480},
-                {strokeStyle: '#e1af00', min: 480, max: 485},
-                {strokeStyle: '#d9b700', min: 485, max: 490},
-                {strokeStyle: '#d1be00', min: 490, max: 495},
-                {strokeStyle: '#c7c600', min: 495, max: 500},
-                {strokeStyle: '#bbcd0c', min: 500, max: 505},
-                {strokeStyle: '#add51c', min: 505, max: 510},
-                {strokeStyle: '#9cdc2c', min: 510, max: 515},
-                {strokeStyle: '#87e33b', min: 515, max: 520},
-                {strokeStyle: '#6beb4a', min: 520, max: 525},
-                {strokeStyle: '#40f25b', min: 525, max: 530},
+                {strokeStyle: '#fc8500', min: 350, max: 355},
+                {strokeStyle: '#f98b00', min: 355, max: 360},
+                {strokeStyle: '#f69200', min: 360, max: 365},
+                {strokeStyle: '#f29900', min: 365, max: 370},
+                {strokeStyle: '#eba200', min: 370, max: 375},
+                {strokeStyle: '#e7a800', min: 375, max: 380},
+                {strokeStyle: '#e1af00', min: 380, max: 385},
+                {strokeStyle: '#d9b700', min: 385, max: 390},
+                {strokeStyle: '#d1be00', min: 390, max: 395},
+                {strokeStyle: '#c7c600', min: 395, max: 400},
+                {strokeStyle: '#bbcd0c', min: 400, max: 405},
+                {strokeStyle: '#add51c', min: 405, max: 410},
+                {strokeStyle: '#9cdc2c', min: 410, max: 415},
+                {strokeStyle: '#87e33b', min: 415, max: 420},
+                {strokeStyle: '#6beb4a', min: 420, max: 425},
+                {strokeStyle: '#40f25b', min: 425, max: 430},
 
-                {strokeStyle: "#40f25b", min: 530, max: 770}, // Green
+                {strokeStyle: "#40f25b", min: 430, max: 770}, // Green
 
                 {strokeStyle: '#40f25b', min: 770, max: 775},
                 {strokeStyle: '#6beb4a', min: 775, max: 780},
@@ -706,17 +720,18 @@ class EasyCareCard extends LitElement {
         };
         var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
         gauge.maxValue = 850; // set max gauge value
-        gauge.setMinValue(450);  // Prefer setter over gauge.minValue = 0
+        gauge.setMinValue(350);  // Prefer setter over gauge.minValue = 0
         gauge.animationSpeed = 32; // set animation speed (32 is default value)
-        gauge.set(poolChlorineObj.state); // set actual value;
+        gauge.set(parseInt(poolChlorineObj.state)); // set actual value;
     }
 
-   getStyles() {
-       const poolDetailObj = this.hass.states["sensor.easycare_pool_detail"];
+    getStyles() {
+       const watbox_id = this.hass.states[this.config.poolWATBOXEntity].entity_id.substring(this.hass.states[this.config.poolWATBOXEntity].entity_id.indexOf("watbox"))
+       const poolDetailObj = this.hass.states["sensor." + watbox_id + "_modele_de_piscine"];
        const imagesUrl = new URL('images/', import.meta.url).href
        var image = imagesUrl + "pool.jpg"
-       if (poolDetailObj.attributes.pool_custom_photo && poolDetailObj.attributes.pool_custom_photo != "")
-           image = "http://easycare.waterair.com/"+poolDetailObj.attributes.pool_custom_photo
+       if (poolDetailObj.attributes.custom_photo && poolDetailObj.attributes.custom_photo != "")
+           image = "http://easycare.waterair.com/"+poolDetailObj.attributes.custom_photo
         return html`
         <style>
             .poolCard {

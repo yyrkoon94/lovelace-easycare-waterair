@@ -22,7 +22,7 @@ const entitiesCard = await cardHelpers.createCardElement({ type: "entities", ent
 // Then we make it load its editor through the static getConfigElement method
 entitiesCard.constructor.getConfigElement();
 
-// v1.1.0
+// v2.0.0
 class EasyCareCardEditor extends LitElement {
 
     constructor() {
@@ -38,10 +38,21 @@ class EasyCareCardEditor extends LitElement {
         return { hass: {}, _config: {} };
     }
 
-    get _poolConnectionEntity() {
-      return this._config.poolConnectionEntity || "";
+    get _poolWATBOXEntity() {
+      return this._config.poolWATBOXEntity || "";
     }
 
+    get _poolBPCEntity() {
+        return this._config.poolBPCEntity || "";
+    }
+
+    get _poolAC1Entity() {
+        return this._config.poolAC1Entity || "";
+    }
+
+    get _poolLRPREntity() {
+      return this._config.poolLRPREntity || "";
+    }
     get _transparent() {
       return this._config.transparent || false;
     }
@@ -58,6 +69,10 @@ class EasyCareCardEditor extends LitElement {
       return this._config.showRefresh != undefined ? this._config.showRefresh : true;
     }
 
+    get _activeWintering() {
+      return this._config.activeWintering || false;
+    }
+
     render() {
         if (!this.hass) {
           return html``;
@@ -67,12 +82,38 @@ class EasyCareCardEditor extends LitElement {
             <div class="card-config">
                 <div class="side-by-side">
                     <ha-entity-picker
-                      label="Pool Connection Entity"
+                      label="Pool Watbox Entity"
                       .hass="${this.hass}"
-                      .value="${this._poolConnectionEntity}"
-                      .configValue=${"poolConnectionEntity"}
+                      .value="${this._poolWATBOXEntity}"
+                      .configValue=${"poolWATBOXEntity"}
                       @value-changed="${this._valueChanged}"
                       ></ha-entity-picker>
+                </div>
+                <div class="side-by-side">
+                    <ha-entity-picker
+                      label="Pool BPC Entity"
+                      .hass="${this.hass}"
+                      .value="${this._poolBPCEntity}"
+                      .configValue=${"poolBPCEntity"}
+                      @value-changed="${this._valueChanged}"
+                      ></ha-entity-picker>
+                </div>
+                <div class="side-by-side">
+                    <ha-entity-picker
+                      label="Pool AC1 Entity"
+                      .hass="${this.hass}"
+                      .value="${this._poolAC1Entity}"
+                      .configValue=${"poolAC1Entity"}
+                      @value-changed="${this._valueChanged}"
+                      ></ha-entity-picker>
+                </div>
+                <div>
+                  <span>Active wintering</span>
+                  <ha-switch
+                      .checked=${this._activeWintering}
+                      .configValue="${"activeWintering"}"
+                      @change="${this._valueChanged}"
+                      ></ha-switch>
                 </div>
                 <div>
                   <span>Small card display</span>
