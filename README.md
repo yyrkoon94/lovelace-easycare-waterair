@@ -55,5 +55,5 @@ poolConnectionEntity: binary_sensor.easy_care_connection
 [home-assitant-theme-docs]: https://www.home-assistant.io/integrations/frontend/#defining-themes
 [hacs]: https://hacs.xyz
 [release-url]: https://github.com/yyrkoon94/lovelace-easycare-waterair/releases
-[ha-easycare-waterair]: https://github.com/yyrkoon94/ha-easycare-waterair
+[ha-easycare-waterair]: https://github.com/adamotte/ha-easycare-bywaterair
 
