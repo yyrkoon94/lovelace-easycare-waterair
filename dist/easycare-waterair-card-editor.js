@@ -22,7 +22,7 @@ const entitiesCard = await cardHelpers.createCardElement({ type: "entities", ent
 // Then we make it load its editor through the static getConfigElement method
 entitiesCard.constructor.getConfigElement();
 
-// v2.0.0
+// v2.1.0
 class EasyCareCardEditor extends LitElement {
 
     constructor() {

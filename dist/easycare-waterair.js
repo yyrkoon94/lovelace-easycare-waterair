@@ -22,7 +22,7 @@ const fireEvent = (node, type, detail, options) => {
 
 class EasyCareCard extends LitElement {
     static get properties() {
-        console.log("%c Lovelace - EasyCare for Waterair  %c 2.0.0 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
+        console.log("%c Lovelace - EasyCare for Waterair  %c 2.1.0 ", "color: #FFFFFF; background: #5D0878; font-weight: 700;", "color: #fdd835; background: #212121; font-weight: 700;")
         return {
             hass: {},
             config: {},
@@ -119,12 +119,12 @@ class EasyCareCard extends LitElement {
         const poolTreatment = this.hass.states["sensor." + ac1_id + "_traitement_actif"];
         return html`
             <div class="poolCardTitleContainer">
-                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && (poolNotification.state != 'None' && poolNotification.state != 'shouldBeWintered' || poolNotification.state == 'shouldBeWintered' && !this.config.activeWintering))|| (poolTreatment && poolTreatment.state != 'None')  ? "title-alert":""}">
+                <div class="poolCardTitle${(this.config.transparent && this.config.transparent == true) || (this.config.small!=undefined && this.config.small) ? "-small" : ""} ${this.config.transparent && this.config.transparent == true? "transparent transparent-font" : ""} ${(poolNotification && (poolNotification.state != 'None' && poolNotification.state != 'should_be_wintered' || poolNotification.state == 'should_be_wintered' && !this.config.activeWintering))|| (poolTreatment && poolTreatment.state != 'None')  ? "title-alert":""}">
                     <div class="zoneNom">
                         ${poolDetailObj.attributes.volume_m3}m3
                     </div>
                     <div class="zoneMessage">
-                    ${(poolNotification && ((poolNotification.state != 'None' && poolNotification.state != 'shouldBeWintered') || (poolNotification.state == 'shouldBeWintered' && !this.config.activeWintering))) || (poolTreatment && poolTreatment.state != 'None')  ?
+                    ${(poolNotification && ((poolNotification.state != 'None' && poolNotification.state != 'should_be_wintered') || (poolNotification.state == 'should_be_wintered' && !this.config.activeWintering))) || (poolTreatment && poolTreatment.state != 'None')  ?
                         "Votre piscine a besoin de vous": "Tout va bien !"}
                     </div>
                     <div class="zoneUpdate">
@@ -214,17 +214,17 @@ class EasyCareCard extends LitElement {
                     <div class="poolBodyMiddle">
                         <div class="emptyBodyMiddleDiv">
                         </div>
-                        ${poolNotification && poolNotification.attributes["all_notifications"] && poolNotification.attributes["all_notifications"] != 'None' ? Object.keys(poolNotification.attributes["all_notifications"]).map(notification => {
-                            return (poolNotification.attributes["all_notifications"][notification].notification == "shouldBeWintered" && !this.config.activeWintering || poolNotification.attributes["all_notifications"][notification].notification != "shouldBeWintered") ? html`<div class="${poolNotification.attributes["all_notifications"][notification].notification == "gatewayConnectivityLost" || poolNotification.attributes["all_notifications"][notification].notification == "batteryLow" || poolNotification.attributes["all_notifications"][notification].notification == "batteryTooLowToMeasure" ? "poolTreatmentMessageGateway" : "poolTreatmentMessage"}">
+                        ${poolNotification && poolNotification.attributes["notifications"] && poolNotification.attributes["notifications"] != 'None' ? Object.keys(poolNotification.attributes["notifications"]).map(notification => {
+                            return (poolNotification.attributes["notifications"][notification].action == "should_be_wintered" && !this.config.activeWintering || poolNotification.attributes["notifications"][notification].action != "should_be_wintered") ? html`<div class="${poolNotification.attributes["notifications"][notification].action == "gateway_connectivity_lost" || poolNotification.attributes["notifications"][notification].action == "battery_low" || poolNotification.attributes["notifications"][notification].action == "battery_too_low_to_measure" ? "poolTreatmentMessageGateway" : "poolTreatmentMessage"}">
                                     <div style="text-align: center;">
-                                        ${poolNotification.attributes["all_notifications"][notification].notification == "shouldDoChlorineTreatment" ? "Votre Traitement Easy Pool"
-                                            : poolNotification.attributes["all_notifications"][notification].notification == "shouldBeCalibrated" ? "Votre AC1 devrait être calibré"
-                                            : poolNotification.attributes["all_notifications"][notification].notification == "shouldBeWintered" ? "Votre AC1 devrait être hiverné"
-                                            : poolNotification.attributes["all_notifications"][notification].notification == "batteryLow" ? "Les piles sont bientôt vides"
-                                            : poolNotification.attributes["all_notifications"][notification].notification == "batteryTooLowToMeasure" ? "Les piles de votre AC1 sont trop faibles, les mesures sont suspendues" : "WATBOX déconnectée"}
+                                        ${poolNotification.attributes["notifications"][notification].action == "should_do_chlorine_treatment" ? "Traitement chlore recommandé"
+                                            : poolNotification.attributes["notifications"][notification].action == "should_be_calibrated" ? "Votre AC1 devrait être calibré"
+                                            : poolNotification.attributes["notifications"][notification].action == "should_be_wintered" ? "Votre AC1 devrait être hiverné"
+                                            : poolNotification.attributes["notifications"][notification].action == "battery_low" ? "Les piles sont bientôt vides"
+                                            : poolNotification.attributes["notifications"][notification].action == "battery_too_low_to_measure" ? "Les piles de votre AC1 sont trop faibles, les mesures sont suspendues" : "WATBOX déconnectée"}
                                     </div>
                                     <div class="poolTreatmentNotificationDate">
-                                        ${this._formatDate(new Date(poolNotification.attributes["all_notifications"][notification]["date"]))}
+                                        ${this._formatDate(new Date(poolNotification.attributes["notifications"][notification].date))}
                                     </div>
                                 </div>` : html``
                         }):""}
@@ -236,7 +236,7 @@ class EasyCareCard extends LitElement {
                                     </div>
                                 </div>`
                             : ""}
-                        ${(poolNotification.state != 'None' && poolNotification.state != 'shouldBeWintered' || poolNotification.state == 'shouldBeWintered' && !this.config.activeWintering) || (poolTreatment && poolTreatment.state != 'None') ?
+                        ${(poolNotification.state != 'None' && poolNotification.state != 'should_be_wintered' || poolNotification.state == 'should_be_wintered' && !this.config.activeWintering) || (poolTreatment && poolTreatment.state != 'None') ?
                             html`<div class="actionsTodo">Actions À Mener</div>` : ""
                         }
                     </div>
